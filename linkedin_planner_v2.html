@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd7;--border2:#ccc8c0;
+  --text:#1a1814;--text2:#6b6560;--text3:#a09a93;--accent:#1a4d8f;--accent-light:#e8eef8;
+  --case:#1a4d8f;--case-bg:#e8eef8;--tip:#7a4f1a;--tip-bg:#f8efe8;
+  --truth:#8f1a1a;--truth-bg:#f8e8e8;--process:#1a6b3a;--process-bg:#e8f5ee;
+  --personal:#4a1a7a;--personal-bg:#f0e8f8;--radius:8px;--radius-lg:14px;
+  --green:#1a6b3a;--green-bg:#e8f5ee;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 32px;width:360px;max-width:100%;}
+.auth-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:300;margin-bottom:6px;}
+.auth-sub{font-size:11px;color:var(--text3);margin-bottom:28px;letter-spacing:.03em;}
+.form-row{margin-bottom:14px;}
+.form-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;transition:border-color .12s;}
+.form-input:focus{border-color:var(--accent);}
+.form-select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a09a93' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.btn{font-size:11px;padding:6px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;}
+.btn:hover{border-color:var(--border2);color:var(--text);}
+.btn-primary{background:var(--text);color:var(--surface);border-color:var(--text);}
+.btn-primary:hover{background:#333;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-danger{background:#f8e8e8;color:var(--truth);border-color:#f0c0c0;}
+.btn-danger:hover{background:#f0c0c0;}
+.auth-btn-full{width:100%;padding:10px;font-size:12px;margin-top:4px;}
+.auth-msg{font-size:11px;margin-top:12px;padding:8px 10px;border-radius:var(--radius);display:none;}
+.auth-msg.error{background:#f8e8e8;color:var(--truth);display:block;}
+.auth-msg.success{background:var(--green-bg);color:var(--green);display:block;}
+
+/* LOADING */
+.loading-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
+.loading-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:var(--text2);}
+.loading-bar{width:200px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.loading-fill{height:100%;background:var(--accent);border-radius:2px;animation:loadfill 1.5s ease-in-out infinite;}
+@keyframes loadfill{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.loading-text{font-size:11px;color:var(--text3);}
+
+/* APP */
+.app{max-width:1200px;margin:0 auto;padding:20px;}
+.app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.app-logo{font-family:'Fraunces',serif;font-size:24px;font-weight:300;letter-spacing:-.5px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.user-email{font-size:11px;color:var(--text3);}
+.sync-status{font-size:10px;color:var(--text3);letter-spacing:.03em;min-width:80px;text-align:right;}
+.sync-status.saving{color:var(--tip);}
+.sync-status.saved{color:var(--green);}
+.sync-status.error{color:var(--truth);}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--surface2);border-radius:var(--radius);padding:3px;width:fit-content;}
+.tab-btn{padding:7px 20px;border:none;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:6px;transition:all .15s;letter-spacing:.03em;}
+.tab-btn.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* FILTERS */
+.filter-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center;}
+.filter-label{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-right:2px;}
+.pill{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Mono',monospace;}
+.pill:hover{border-color:var(--border2);color:var(--text);}
+.pill.on{background:var(--text);color:var(--surface);border-color:var(--text);}
+.pill.on.cat-case{background:var(--case);border-color:var(--case);color:#fff;}
+.pill.on.cat-tip{background:var(--tip);border-color:var(--tip);color:#fff;}
+.pill.on.cat-truth{background:var(--truth);border-color:var(--truth);color:#fff;}
+.pill.on.cat-process{background:var(--process);border-color:var(--process);color:#fff;}
+.pill.on.cat-personal{background:var(--personal);border-color:var(--personal);color:#fff;}
+.sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
+
+/* STATS */
+.stats-bar{display:flex;gap:20px;margin-bottom:14px;padding:10px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);}
+.stat-v{font-size:18px;font-weight:500;color:var(--text);font-family:'Fraunces',serif;}
+.stat-l{font-size:10px;color:var(--text3);letter-spacing:.04em;margin-top:1px;}
+
+/* CONTENT LAYOUT */
+.content-layout{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start;}
+
+/* LIST */
+.list-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.month-head{padding:9px 16px;background:var(--surface2);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);font-weight:500;}
+.week-head{padding:5px 16px;font-size:10px;color:var(--text3);letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--surface);}
+.post-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.post-row:last-child{border-bottom:none;}
+.post-row:hover{background:var(--bg);}
+.post-row.selected{background:var(--accent-light);}
+.post-row.done .post-title{color:var(--text3);text-decoration:line-through;}
+.post-row.today-hl{background:#fffde8;}
+.cb{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;cursor:pointer;}
+.post-row.done .cb{background:var(--accent);border-color:var(--accent);}
+.cb svg{display:none;}
+.post-row.done .cb svg{display:block;}
+.day-tag{font-size:10px;font-weight:500;color:var(--text3);min-width:20px;}
+.cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-case{background:var(--case);}.dot-tip{background:var(--tip);}.dot-truth{background:var(--truth);}.dot-process{background:var(--process);}.dot-personal{background:var(--personal);}
+.post-title{flex:1;font-size:12px;color:var(--text);line-height:1.4;}
+.cat-badge{font-size:10px;padding:2px 7px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
+.cat-case{color:var(--case);background:var(--case-bg);}
+.cat-tip{color:var(--tip);background:var(--tip-bg);}
+.cat-truth{color:var(--truth);background:var(--truth-bg);}
+.cat-process{color:var(--process);background:var(--process-bg);}
+.cat-personal{color:var(--personal);background:var(--personal-bg);}
+.custom-badge{font-size:9px;padding:1px 5px;border-radius:6px;background:var(--surface2);color:var(--text3);margin-left:4px;}
+
+/* EDITOR */
+.editor-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);position:sticky;top:16px;}
+.editor-header{padding:14px 16px 12px;border-bottom:1px solid var(--border);}
+.editor-topic{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:6px;font-family:'Fraunces',serif;}
+.editor-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.editor-body{padding:14px 16px;}
+.editor-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+textarea{width:100%;height:240px;border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);resize:vertical;outline:none;line-height:1.7;transition:border-color .12s;}
+textarea:focus{border-color:var(--accent);}
+textarea::placeholder{color:var(--text3);}
+.editor-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;justify-content:space-between;}
+.word-count{font-size:10px;color:var(--text3);}
+.add-idea-btn{width:100%;padding:8px;border:1px dashed var(--border2);border-radius:var(--radius);background:transparent;color:var(--text3);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .12s;}
+.add-idea-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+
+/* CALENDAR */
+.cal-layout{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start;}
+.cal-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.cal-month-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.cal-month-title{font-family:'Fraunces',serif;font-size:19px;font-weight:300;}
+.nav-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);transition:all .12s;}
+.nav-btn:hover{border-color:var(--border2);color:var(--text);}
+.cal-headers{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);background:var(--surface2);}
+.cal-day-header{padding:9px 4px;text-align:center;font-size:10px;letter-spacing:.05em;color:var(--text2);font-weight:500;text-transform:uppercase;}
+.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-cell{min-height:115px;padding:7px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);}
+.cal-cell:nth-child(7n){border-right:none;}
+.cal-cell.other-month{background:var(--bg);}
+.cal-date-num{font-size:11px;font-weight:500;color:var(--text3);margin-bottom:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.cal-cell.today .cal-date-num{background:var(--accent);color:#fff;font-weight:600;}
+.cal-cell.other-month .cal-date-num{color:var(--border2);}
+.cal-post{font-size:10px;padding:3px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;line-height:1.4;transition:all .1s;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;border-left:2px solid transparent;}
+.cal-post:hover{filter:brightness(.93);}
+.cal-post.done{opacity:.4;text-decoration:line-through;}
+.cal-post.selected-post{outline:2px solid var(--accent);outline-offset:1px;}
+.cal-legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;border-top:1px solid var(--border);background:var(--surface2);}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);}
+.cal-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* EDIT TAB */
+.edit-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.edit-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.edit-toolbar-title{font-size:12px;font-weight:500;color:var(--text2);}
+.edit-row{display:grid;grid-template-columns:60px 80px 1fr 100px 36px;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);transition:background .1s;}
+.edit-row:hover{background:var(--bg);}
+.edit-row:last-child{border-bottom:none;}
+.edit-input{width:100%;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:transparent;outline:none;transition:all .12s;}
+.edit-input:hover{border-color:var(--border);}
+.edit-input:focus{border-color:var(--accent);background:var(--bg);}
+.edit-select{width:100%;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:transparent;outline:none;cursor:pointer;transition:all .12s;appearance:none;}
+.edit-select:hover{border-color:var(--border);}
+.edit-select:focus{border-color:var(--accent);background:var(--bg);}
+.edit-date{font-size:10px;color:var(--text3);}
+.edit-del{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .12s;flex-shrink:0;}
+.edit-del:hover{background:#f8e8e8;color:var(--truth);}
+.edit-add-row{display:flex;gap:8px;align-items:center;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface2);}
+.edit-section-head{padding:8px 16px;background:var(--surface2);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,24,20,.45);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:400px;max-width:94vw;padding:24px;animation:modalIn .15s ease;}
+@keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-family:'Fraunces',serif;font-size:17px;font-weight:300;margin-bottom:18px;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+.no-results{padding:30px;text-align:center;color:var(--text3);font-size:12px;}
+.today-hl{background:#fffde8!important;}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">LinkedIn Planner</div>
+    <div class="auth-sub">твоя система · 6 месяцев · 182 поста</div>
+    <div class="form-row">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="auth-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Пароль</label>
+      <input class="form-input" id="auth-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
+    </div>
+    <button class="btn btn-primary auth-btn-full" id="auth-btn" onclick="authSubmit()">Войти</button>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loading-screen" class="loading-screen" style="display:none;">
+  <div class="loading-logo">LinkedIn Planner</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div class="loading-text" id="loading-text">загрузка постов...</div>
+</div>
+
+<!-- APP -->
+<div id="app-screen" style="display:none;">
+  <div class="app">
+    <div class="app-header">
+      <div class="app-logo">LinkedIn Planner</div>
+      <div class="header-right">
+        <span class="sync-status" id="sync-status"></span>
+        <span class="user-email" id="user-email"></span>
+        <button class="btn" onclick="signOut()">Выйти</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('list')">Список</button>
+      <button class="tab-btn" onclick="switchTab('calendar')">Календарь</button>
+      <button class="tab-btn" onclick="switchTab('edit')">Редактировать</button>
+    </div>
+
+    <!-- LIST TAB -->
+    <div id="tab-list">
+      <div class="filter-bar">
+        <span class="filter-label">Месяц</span>
+        <span class="pill on" data-g="m" data-v="0" onclick="setFilter(this)">Все</span>
+        <span id="month-pills"></span>
+        <div class="sep"></div>
+        <span class="filter-label">Рубрика</span>
+        <span class="pill on" data-g="c" data-v="all" onclick="setFilter(this)">Все</span>
+        <span class="pill cat-case" data-g="c" data-v="case" onclick="setFilter(this)">Кейс</span>
+        <span class="pill cat-tip" data-g="c" data-v="tip" onclick="setFilter(this)">Совет</span>
+        <span class="pill cat-truth" data-g="c" data-v="truth" onclick="setFilter(this)">Правда</span>
+        <span class="pill cat-process" data-g="c" data-v="process" onclick="setFilter(this)">Процесс</span>
+        <span class="pill cat-personal" data-g="c" data-v="personal" onclick="setFilter(this)">Личное</span>
+        <div class="sep"></div>
+        <span class="pill on" data-g="s" data-v="all" onclick="setFilter(this)">Все</span>
+        <span class="pill" data-g="s" data-v="todo" onclick="setFilter(this)">Не опубл.</span>
+        <span class="pill" data-g="s" data-v="done" onclick="setFilter(this)">Опубл.</span>
+      </div>
+      <div class="stats-bar">
+        <div><div class="stat-v" id="st-total">–</div><div class="stat-l">всего</div></div>
+        <div><div class="stat-v" id="st-done">0</div><div class="stat-l">опубл.</div></div>
+        <div><div class="stat-v" id="st-left">–</div><div class="stat-l">осталось</div></div>
+        <div><div class="stat-v" id="st-vis">–</div><div class="stat-l">показано</div></div>
+      </div>
+      <div class="content-layout">
+        <div class="list-panel" id="list-container"></div>
+        <div class="editor-panel">
+          <div class="editor-header">
+            <div class="editor-topic" id="editor-topic-list" style="color:var(--text3);font-style:italic;font-weight:300;">Выбери пост из списка</div>
+            <div class="editor-meta" id="editor-meta-list"></div>
+          </div>
+          <div class="editor-body">
+            <div class="editor-label">Текст публикации</div>
+            <textarea id="textarea-list" placeholder="Напиши текст поста...&#10;&#10;Зацеп → контекст → действие → результат → CTA"></textarea>
+          </div>
+          <div class="editor-footer">
+            <span class="word-count" id="wc-list">0 слов</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn" onclick="clearEditor('list')">Очистить</button>
+              <button class="btn btn-primary" onclick="markDone('list')">Опубликовано ✓</button>
+            </div>
+          </div>
+          <div style="padding:0 16px 14px;"><button class="add-idea-btn" onclick="openModal('list')">+ добавить свою идею</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR TAB -->
+    <div id="tab-calendar" style="display:none;">
+      <div class="filter-bar">
+        <span class="filter-label">Рубрика</span>
+        <span class="pill on" data-g="cc" data-v="all" onclick="setFilter(this)">Все</span>
+        <span class="pill cat-case" data-g="cc" data-v="case" onclick="setFilter(this)">Кейс</span>
+        <span class="pill cat-tip" data-g="cc" data-v="tip" onclick="setFilter(this)">Совет</span>
+        <span class="pill cat-truth" data-g="cc" data-v="truth" onclick="setFilter(this)">Правда</span>
+        <span class="pill cat-process" data-g="cc" data-v="process" onclick="setFilter(this)">Процесс</span>
+        <span class="pill cat-personal" data-g="cc" data-v="personal" onclick="setFilter(this)">Личное</span>
+        <div class="sep"></div>
+        <span class="pill on" data-g="cs" data-v="all" onclick="setFilter(this)">Все</span>
+        <span class="pill" data-g="cs" data-v="todo" onclick="setFilter(this)">Не опубл.</span>
+        <span class="pill" data-g="cs" data-v="done" onclick="setFilter(this)">Опубл.</span>
+      </div>
+      <div class="cal-layout">
+        <div class="cal-panel">
+          <div class="cal-month-nav">
+            <button class="nav-btn" onclick="calPrev()">&#8592;</button>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="cal-month-title" id="cal-title"></span>
+              <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="goToday()">Сегодня</button>
+            </div>
+            <button class="nav-btn" onclick="calNext()">&#8594;</button>
+          </div>
+          <div class="cal-headers" id="cal-headers"></div>
+          <div class="cal-body" id="cal-grid"></div>
+          <div class="cal-legend">
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--case)"></span>Кейс (пн)</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--tip)"></span>Совет (вт/чт/сб)</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--truth)"></span>Правда (ср)</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--process)"></span>Процесс (пт)</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--personal)"></span>Личное (вс)</div>
+          </div>
+        </div>
+        <div class="editor-panel">
+          <div class="editor-header">
+            <div class="editor-topic" id="editor-topic-cal" style="color:var(--text3);font-style:italic;font-weight:300;">Выбери день в календаре</div>
+            <div class="editor-meta" id="editor-meta-cal"></div>
+          </div>
+          <div class="editor-body">
+            <div class="editor-label">Текст публикации</div>
+            <textarea id="textarea-cal" placeholder="Напиши текст поста..."></textarea>
+          </div>
+          <div class="editor-footer">
+            <span class="word-count" id="wc-cal">0 слов</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn" onclick="clearEditor('cal')">Очистить</button>
+              <button class="btn btn-primary" onclick="markDone('cal')">Опубликовано ✓</button>
+            </div>
+          </div>
+          <div style="padding:0 16px 14px;"><button class="add-idea-btn" onclick="openModal('cal')">+ добавить свою идею</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT TAB -->
+    <div id="tab-edit" style="display:none;">
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;color:var(--text3);">Редактируй темы, рубрики, даты. Изменения сохраняются сразу.</span>
+        <button class="btn btn-primary" onclick="openModal('edit')">+ Добавить пост</button>
+      </div>
+      <div class="edit-panel" id="edit-container"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modal-title-text">Добавить пост</div>
+    <div class="form-row">
+      <label class="form-label">Тема / заголовок</label>
+      <input class="form-input" id="modal-title-input" type="text" placeholder="Как я ускорила дашборд на 40%">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Рубрика</label>
+      <select class="form-select" id="modal-cat">
+        <option value="case">Кейс</option>
+        <option value="tip">Совет</option>
+        <option value="truth">Грязная правда</option>
+        <option value="process">Процесс</option>
+        <option value="personal">Личное</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Дата</label>
+      <input class="form-input" id="modal-date" type="date">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveModal()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://bwtkvfzxiguonhbnosxm.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3dGt2Znp4aWd1b25oYm5vc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzEyNjksImV4cCI6MjA5Mjk0NzI2OX0.W1IjU-C3RSszPRYrHyhoLaBKrTnPd7QwQyyMfJCVOkM';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+let currentUser=null;
+let posts=[];
+let saveTimer=null;
+let selectedPost=null,selectedCtx='list';
+const filters={m:0,c:'all',s:'all',cc:'all',cs:'all'};
+const _today=new Date();
+let calYear=_today.getFullYear(),calMonth=_today.getMonth();
+
+const MN=["","Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const MN_SHORT=["","Янв","Фев","Март","Апр","Май","Июнь","Июль","Авг","Сент","Окт","Ноя","Дек"];
+const MONTH_NAMES_RU=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const DAYS=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+const CATS_BY_DAY=["case","tip","truth","tip","process","tip","personal"];
+const CAT_NAME={case:"Кейс",truth:"Правда",process:"Процесс",tip:"Совет",personal:"Личное"};
+const CAT_CLS={case:"cat-case",truth:"cat-truth",process:"cat-process",tip:"cat-tip",personal:"cat-personal"};
+const DOT_CLS={case:"dot-case",truth:"dot-truth",process:"dot-process",tip:"dot-tip",personal:"dot-personal"};
+
+// Default titles
+const T={
+case:["Как я сократила время закрытия отчёта в 16 раз","Power BI для нетехнической команды: с чего начать","ETL без программиста: мой подход в Power Query","Как я выстроила единый источник правды для 3 отделов","Автоматизация согласований через Bitrix и Telegram","Дашборд по продажам: от хаоса к системе за 2 недели","Как я внедрила RLS без участия IT-отдела","Отчётность в страховой компании: специфика и нюансы","Кейс: воронка продаж в BI — как это выглядит изнутри","Как я автоматизировала сбор данных из 6 источников","Power BI Service: настройка шлюза без боли","Кейс: Telegram-бот для команды из 50 человек","Как я перестроила отчётность под новую оргструктуру","Дашборд, которым пользуются каждый день","Кейс: внедрила систему KPI с нуля за 3 месяца","Данные из CRM как основа для принятия решений","Аналитика для маркетинга: что попросили vs что получили","Как делала презентацию данных для топ-менеджмента","Кейс: автоматический ежедневный отчёт на email","Реструктуризация модели данных: до и после","Один дашборд заменил еженедельное совещание","Power BI Embedded: первый опыт и выводы","Кейс: аналитика оттока клиентов с нуля","Итог полугода: 5 кейсов которые изменили подход","Как я строила отчётность в стартапе без бюджета","Кейс: автоматизация HR-аналитики"],
+tip:["SELECTEDVALUE vs VALUES: когда что использовать","Как сделать динамический заголовок в Power BI","3 функции Power Query M которые использую каждый день","Переменные VAR в DAX: почему это меняет всё","Как правильно построить таблицу дат","Tooltip-страницы: недооценённый инструмент Power BI","Как избежать circular dependency в DAX","DIVIDE вместо деления: зачем и когда","Как настроить инкрементальное обновление","Row-level security пошагово","Conditional formatting в таблицах: 3 приёма","Как дебажить DAX через DAX Studio","Разница Import vs DirectQuery на практике","Как сделать drill-through правильно","Оптимизация модели: убираем лишнее","Как читать план выполнения SQL-запроса","ClickHouse: зачем аналитику знать этот инструмент","Bookmarks в Power BI: навигация без разработчика","What-if параметры: как объяснить бизнесу сценарии","Как тестировать дашборд перед сдачей","Power Automate + Power BI: простая интеграция","Агрегации в Power BI: когда нужны","Как использовать группировку и binning","CALCULATE: самая важная функция DAX","Как я провожу ревью чужого дашборда","Подготовка к PL-300: что реально помогло","Как объяснить ценность аналитики нетехнику","Топ-3 расширения VSCode для работы с данными","Как настроить алерты в Power BI Service","Параметры подключения: что важно знать","Как сделать мобильный макет в Power BI","RANKX: как работает и где применять","Иерархии в модели данных: правила построения","Как использовать Python в Power Query","Decomposition tree: когда это реально полезно","Key influencers: честный разбор инструмента","Как настроить Row-level security через роли","Как писать M-функции с параметрами","Финальный совет: как поддерживать дашборды живыми"],
+truth:["80% дашбордов — красивая мусорка","Почему «сделайте красиво» — это не ТЗ","SQL не спасёт если хаос в процессах","Автоматизация не работает без понимания процесса","RLS без IT — почему почти никто не делает","Дашборд с 20 графиками который не отвечает ни на что","Технический долг в BI: как накапливается незаметно","Почему первая версия дашборда всегда неправильная","Главная ложь: «у нас есть данные»","Красивый отчёт ≠ полезный отчёт","Почему аналитик — это не «человек с Excel»","Что происходит когда данные расходятся","Почему «просто дашборд» — никогда не просто","Почему бизнес не использует дашборды которые заказывает","Проблема не в инструменте а в постановке задачи","Почему KPI без контекста — это ничто","Аналитика без доверия к данным: что делать","Почему автоматизация ломается через 3 месяца","Данные есть — инсайтов нет. В чём проблема","Почему отчёт который «всё устраивает» ничего не меняет","Правда о работе аналитика которую не пишут в вакансиях","Почему я перестала делать отчёты «для галочки»","Дашборд как декор: когда визуализация мешает","Self-service BI: почему не работает само по себе","Почему данные врут — и это не баг","Итог полугода: в чём я была не права"],
+process:["Бот → задача → статус → уведомление: моя система","Как выглядит нормальная воронка задач","CRM без логики = дорогая таблица","5 ошибок при внедрении автоматизации","Как я документирую процессы","Как строить ТЗ для дашборда","Мой процесс онбординга нового отчёта","Как провести discovery перед проектом","Структура папок и файлов в BI-проекте","Как собирать требования с нетехнических стейкхолдеров","Ревью DAX-мер: мой подход","Как я планирую спринт аналитика","Процесс согласования дашборда с заказчиком","Как я веду документацию модели данных","Шаблон ТЗ для BI-проекта","Как организовать хранение отчётов в компании","Процесс деплоя отчёта в Power BI Service","Как провести демо дашборда для бизнеса","Как отслеживать качество данных в пайплайне","Процесс handover отчёта другому аналитику","Как я описываю метрики в глоссарии","Мой шаблон постмортема аналитического проекта","Как построить data governance в малой команде","Процесс обновления и поддержки старых отчётов","Как я оцениваю трудозатраты на BI-задачи","Итог полугода: что изменила в процессах"],
+personal:["Из логистики в аналитику: что реально помогло","Как я учусь Python работая full-time","Почему иду в PL-300 и что это даёт","Мой стек: что использую и зачем","4 года в аналитике: что изменилось","Что читаю и смотрю про данные сейчас","Как организую рабочее пространство","Что значит быть self-taught аналитиком","Ошибка которая стоила неделю работы","Честно о том что не нравится в профессии","Как я готовилась к сертификации PL-300","3 месяца LinkedIn: цифры и выводы","Почему аналитик должен уметь продавать идеи","Как я справляюсь с синдромом самозванца","Что дал переход в страховую компанию","Книги которые изменили подход к данным","Как нахожу баланс между глубиной и скоростью","Почему начала вести LinkedIn и что вышло","Мой путь в немецкий язык: зачем и как","Что я узнала о себе за год в аналитике","Как принимаю карьерные решения","Почему портфолио важнее резюме","Что изменилось после PL-300","Мои цели на следующие 6 месяцев","Что советую тем кто входит в аналитику","Итог полугода: личный взгляд назад и вперёд"]
+};
+
+function genDefaultPosts(){
+  const idx={case:0,tip:0,truth:0,process:0,personal:0};
+  const result=[];
+  const START=new Date(2026,3,27);
+  for(let w=0;w<26;w++){
+    for(let d=0;d<7;d++){
+      const cat=CATS_BY_DAY[d];
+      const title=T[cat][idx[cat]%T[cat].length];
+      const date=new Date(START); date.setDate(START.getDate()+w*7+d);
+      const m=date.getMonth()+1;
+      result.push({post_key:`post_${w}_${d}`,week:w,day_index:d,cat,title,post_date:date.toISOString().split('T')[0],is_custom:false,sort_order:w*7+d,m,done:false,post_text:''});
+      idx[cat]++;
+    }
+  }
+  return result;
+}
+
+// ─── AUTH ──────────────────────────────────────────────────
+async function authSubmit(){
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  const btn=document.getElementById('auth-btn');
+  if(!email||!password){showMsg('Заполни email и пароль','error');return;}
+  btn.disabled=true;btn.textContent='...';
+  try{
+    const res=await sb.auth.signInWithPassword({email,password});
+    if(res.error)throw res.error;
+    currentUser=res.data.user||res.data.session?.user;
+    await loadAndInit();
+  }catch(e){showMsg(e.message||'Неверный email или пароль','error');}
+  btn.disabled=false;btn.textContent='Войти';
+}
+
+function showMsg(text,type){
+  const el=document.getElementById('auth-msg');
+  el.textContent=text;el.className='auth-msg '+type;
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser=null;posts=[];
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+sb.auth.getSession().then(({data:{session}})=>{if(session){currentUser=session.user;loadAndInit();}});
+sb.auth.onAuthStateChange((_,session)=>{if(session&&!currentUser){currentUser=session.user;loadAndInit();}});
+
+// ─── LOAD & INIT ───────────────────────────────────────────
+async function loadAndInit(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('loading-screen').style.display='flex';
+  document.getElementById('user-email').textContent=currentUser.email;
+
+  try{
+    setLoading('загрузка постов из базы...');
+    const {data,error}=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
+    if(error)throw error;
+
+    if(!data||data.length===0){
+      setLoading('первый запуск — загружаем 182 поста...');
+      const defaults=genDefaultPosts();
+      const toInsert=defaults.map(p=>({...p,user_id:currentUser.id}));
+      // Insert in batches of 50
+      for(let i=0;i<toInsert.length;i+=50){
+        const {error:ie}=await sb.from('posts').insert(toInsert.slice(i,i+50));
+        if(ie)throw ie;
+      }
+      const {data:fresh}=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
+      posts=hydratePosts(fresh||[]);
+    } else {
+      posts=hydratePosts(data);
+    }
+
+    setSyncStatus('всё сохранено','saved');
+    document.getElementById('loading-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+    buildMonthPills();
+    renderList();renderCal();renderEdit();
+    setTimeout(()=>{
+      const tp=posts.find(p=>p.date.toDateString()===new Date().toDateString());
+      if(tp){selectPost(tp.id,'list');setTimeout(()=>{const el=document.querySelector('.post-row.today-hl');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},80);}
+    },100);
+  }catch(e){
+    setLoading('ошибка: '+e.message);
+  }
+}
+
+function hydratePosts(data){
+  return data.map((row,i)=>{
+    const d=new Date(row.post_date+'T00:00:00');
+    return{...row,id:i,date:d,m:d.getMonth()+1,
+      done:row.done||false,post_text:row.post_text||''};
+  });
+}
+
+function setLoading(text){document.getElementById('loading-text').textContent=text;}
+function setSyncStatus(text,cls){const el=document.getElementById('sync-status');el.textContent=text;el.className='sync-status '+cls;}
+
+function buildMonthPills(){
+  const months=[...new Set(posts.map(p=>p.m))].sort((a,b)=>a-b);
+  const container=document.getElementById('month-pills');
+  container.innerHTML=months.map(m=>`<span class="pill" data-g="m" data-v="${m}" onclick="setFilter(this)">${MN_SHORT[m]}</span>`).join('');
+}
+
+// ─── SAVE ─────────────────────────────────────────────────
+async function savePostToDB(p){
+  if(!currentUser)return;
+  setSyncStatus('сохранение...','saving');
+  const payload={done:p.done,post_text:p.post_text||'',updated_at:new Date().toISOString()};
+  if(p.id_db){
+    const{error}=await sb.from('posts').update(payload).eq('id',p.id_db);
+    if(error){setSyncStatus('ошибка','error');return;}
+  }
+  setSyncStatus('всё сохранено','saved');
+}
+
+async function updatePostField(p,fields){
+  if(!currentUser||!p.id_db)return;
+  setSyncStatus('сохранение...','saving');
+  const{error}=await sb.from('posts').update({...fields,updated_at:new Date().toISOString()}).eq('id',p.id_db);
+  if(error){setSyncStatus('ошибка','error');return;}
+  setSyncStatus('всё сохранено','saved');
+}
+
+async function deletePostFromDB(p){
+  if(!currentUser||!p.id_db)return;
+  await sb.from('posts').delete().eq('id',p.id_db);
+}
+
+async function insertPostToDB(postData){
+  const{data,error}=await sb.from('posts').insert({...postData,user_id:currentUser.id}).select().single();
+  if(error)throw error;
+  return data;
+}
+
+function debounceSave(p){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>savePostToDB(p),800);
+}
+
+// ─── FILTERS ──────────────────────────────────────────────
+function setFilter(el){
+  const g=el.dataset.g,v=el.dataset.v;
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  if(g==='m')filters.m=parseInt(v)||0;
+  else if(g==='c')filters.c=v;
+  else if(g==='s')filters.s=v;
+  else if(g==='cc')filters.cc=v;
+  else if(g==='cs')filters.cs=v;
+  if(g==='m'||g==='c'||g==='s')renderList();else renderCal();
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['list','calendar','edit'][i]===t));
+  ['list','calendar','edit'].forEach(id=>document.getElementById(`tab-${id}`).style.display=id===t?'':'none');
+  if(t==='calendar')renderCal();
+  if(t==='edit')renderEdit();
+}
+
+// ─── LIST ─────────────────────────────────────────────────
+function filteredPosts(){
+  return posts.filter(p=>{
+    if(filters.m&&p.m!==filters.m)return false;
+    if(filters.c!=='all'&&p.cat!==filters.c)return false;
+    if(filters.s==='done'&&!p.done)return false;
+    if(filters.s==='todo'&&p.done)return false;
+    return true;
+  });
+}
+
+function computeWLocal(postsArr){
+  let cm=-1,wm=0,lw=-1;
+  postsArr.forEach(p=>{
+    if(p.m!==cm){cm=p.m;wm=0;lw=-1;}
+    if(p.week!==lw){wm++;lw=p.week;}
+    p.wLocal=wm;
+  });
+}
+
+function renderList(){
+  computeWLocal(posts);
+  const f=filteredPosts();
+  document.getElementById('st-done').textContent=posts.filter(p=>p.done).length;
+  document.getElementById('st-left').textContent=posts.filter(p=>!p.done).length;
+  document.getElementById('st-vis').textContent=f.length;
+  document.getElementById('st-total').textContent=posts.length;
+  const bm={};
+  f.forEach(p=>{if(!bm[p.m])bm[p.m]={};if(!bm[p.m][p.wLocal])bm[p.m][p.wLocal]=[];bm[p.m][p.wLocal].push(p);});
+  let h='';
+  if(!f.length){h='<div class="no-results">Нет постов по фильтрам</div>';}
+  else{
+    const ts=new Date().toDateString();
+    Object.keys(bm).sort((a,b)=>a-b).forEach(m=>{
+      h+=`<div><div class="month-head">${MN[parseInt(m)]||m}</div>`;
+      Object.keys(bm[m]).sort((a,b)=>a-b).forEach(w=>{
+        const twk=bm[m][w].some(p=>p.date.toDateString()===ts);
+        h+=`<div class="week-head${twk?' today-hl':''}">Неделя ${w}</div>`;
+        bm[m][w].forEach(p=>{
+          const sel=selectedPost&&selectedPost.id===p.id&&selectedCtx==='list';
+          const ist=p.date.toDateString()===ts;
+          h+=`<div class="post-row${p.done?' done':''}${sel?' selected':''}${ist?' today-hl':''}" onclick="selectPost(${p.id},'list')">
+            <div class="cb" onclick="event.stopPropagation();toggleDone(${p.id})">
+              <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="day-tag">${DAYS[p.day_index]}</span>
+            <span class="cat-dot ${DOT_CLS[p.cat]}"></span>
+            <span class="post-title">${p.title}${p.is_custom?'<span class="custom-badge">своя</span>':''}</span>
+            <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
+          </div>`;
+        });
+      });
+      h+=`</div>`;
+    });
+  }
+  document.getElementById('list-container').innerHTML=h;
+}
+
+// ─── EDITOR ───────────────────────────────────────────────
+function selectPost(id,ctx){
+  if(selectedPost){
+    const ta=document.getElementById(`textarea-${selectedCtx}`);
+    if(ta){selectedPost.post_text=ta.value;debounceSave(selectedPost);}
+  }
+  selectedPost=posts[id];selectedCtx=ctx;
+  const ta=document.getElementById(`textarea-${ctx}`);
+  ta.value=selectedPost.post_text||'';updateWC(ctx);
+  document.getElementById(`editor-topic-${ctx}`).textContent=selectedPost.title;
+  document.getElementById(`editor-topic-${ctx}`).style.cssText='';
+  const d=selectedPost.date;
+  const ds=`${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
+  document.getElementById(`editor-meta-${ctx}`).innerHTML=`<span class="cat-badge ${CAT_CLS[selectedPost.cat]}">${CAT_NAME[selectedPost.cat]}</span><span style="font-size:11px;color:var(--text3)">${DAYS[selectedPost.day_index]}, ${ds}</span>`;
+  if(ctx==='list')renderList();else renderCal();
+}
+
+function toggleDone(id){
+  const p=posts[id];p.done=!p.done;
+  savePostToDB(p);renderList();
+  if(document.getElementById('tab-calendar').style.display!=='none')renderCal();
+}
+
+function clearEditor(ctx){
+  if(!selectedPost)return;
+  selectedPost.post_text='';
+  document.getElementById(`textarea-${ctx}`).value='';updateWC(ctx);
+  debounceSave(selectedPost);
+}
+
+function markDone(ctx){
+  if(!selectedPost)return;
+  selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;
+  selectedPost.done=true;savePostToDB(selectedPost);renderList();
+  if(document.getElementById('tab-calendar').style.display!=='none')renderCal();
+}
+
+function updateWC(ctx){
+  const ta=document.getElementById(`textarea-${ctx}`);
+  const w=ta.value.trim()?ta.value.trim().split(/\s+/).length:0;
+  document.getElementById(`wc-${ctx}`).textContent=`${w} слов`;
+}
+
+document.getElementById('textarea-list').addEventListener('input',()=>{updateWC('list');if(selectedPost){selectedPost.post_text=document.getElementById('textarea-list').value;debounceSave(selectedPost);}});
+document.getElementById('textarea-cal').addEventListener('input',()=>{updateWC('cal');if(selectedPost){selectedPost.post_text=document.getElementById('textarea-cal').value;debounceSave(selectedPost);}});
+
+// ─── CALENDAR ─────────────────────────────────────────────
+function renderCal(){
+  document.getElementById('cal-title').textContent=`${MONTH_NAMES_RU[calMonth]} ${calYear}`;
+  document.getElementById('cal-headers').innerHTML=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div class="cal-day-header">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1);
+  let sd=first.getDay()-1;if(sd<0)sd=6;
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const tod=new Date();let cells='';
+  const pd=new Date(calYear,calMonth,0).getDate();
+  for(let i=0;i<sd;i++)cells+=`<div class="cal-cell other-month"><div class="cal-date-num">${pd-sd+i+1}</div></div>`;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(calYear,calMonth,d);
+    const ist=date.toDateString()===tod.toDateString();
+    const dp=posts.filter(p=>{
+      if(p.date.getFullYear()!==calYear||p.date.getMonth()!==calMonth||p.date.getDate()!==d)return false;
+      if(filters.cc!=='all'&&p.cat!==filters.cc)return false;
+      if(filters.cs==='done'&&!p.done)return false;
+      if(filters.cs==='todo'&&p.done)return false;
+      return true;
+    });
+    cells+=`<div class="cal-cell${ist?' today':''}">
+      <div class="cal-date-num">${d}</div>
+      ${dp.map(p=>{
+        const isSel=selectedPost&&selectedPost.id===p.id&&selectedCtx==='cal';
+        return`<div class="cal-post ${CAT_CLS[p.cat]}${p.done?' done':''}${isSel?' selected-post':''}" onclick="selectPost(${p.id},'cal')" title="${p.title}">${p.title}</div>`;
+      }).join('')}
+    </div>`;
+  }
+  const rem=(sd+dim)%7===0?0:7-(sd+dim)%7;
+  for(let i=1;i<=rem;i++)cells+=`<div class="cal-cell other-month"><div class="cal-date-num">${i}</div></div>`;
+  document.getElementById('cal-grid').innerHTML=cells;
+}
+
+function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else calMonth--;renderCal();}
+function calNext(){if(calMonth===11){calMonth=0;calYear++;}else calMonth++;renderCal();}
+function goToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderCal();setTimeout(()=>{const el=document.querySelector('.cal-cell.today');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},50);}
+
+// ─── EDIT TAB ─────────────────────────────────────────────
+function renderEdit(){
+  const bm={};
+  posts.forEach(p=>{if(!bm[p.m])bm[p.m]=[];bm[p.m].push(p);});
+  let h='';
+  Object.keys(bm).sort((a,b)=>a-b).forEach(m=>{
+    h+=`<div class="edit-section-head">${MN[parseInt(m)]||m}</div>`;
+    h+=`<div class="edit-row" style="background:var(--surface2);font-size:10px;color:var(--text3);letter-spacing:.04em;padding:5px 16px;">
+      <span>День</span><span>Рубрика</span><span>Тема</span><span>Дата</span><span></span>
+    </div>`;
+    bm[m].forEach(p=>{
+      const ds=p.date.toISOString().split('T')[0];
+      h+=`<div class="edit-row">
+        <span class="edit-date">${DAYS[p.day_index]}</span>
+        <select class="edit-select ${CAT_CLS[p.cat]}" onchange="editCat(${p.id},this.value)">
+          <option value="case"${p.cat==='case'?' selected':''}>Кейс</option>
+          <option value="tip"${p.cat==='tip'?' selected':''}>Совет</option>
+          <option value="truth"${p.cat==='truth'?' selected':''}>Правда</option>
+          <option value="process"${p.cat==='process'?' selected':''}>Процесс</option>
+          <option value="personal"${p.cat==='personal'?' selected':''}>Личное</option>
+        </select>
+        <input class="edit-input" value="${p.title.replace(/"/g,'&quot;')}" onchange="editTitle(${p.id},this.value)" onblur="editTitle(${p.id},this.value)">
+        <input class="edit-input" type="date" value="${ds}" onchange="editDate(${p.id},this.value)">
+        <button class="edit-del" onclick="deletePost(${p.id})" title="Удалить">×</button>
+      </div>`;
+    });
+  });
+  document.getElementById('edit-container').innerHTML=h;
+}
+
+function editTitle(id,val){
+  const p=posts[id];if(!p||p.title===val)return;
+  p.title=val;updatePostField(p,{title:val});
+}
+
+function editCat(id,val){
+  const p=posts[id];if(!p)return;
+  p.cat=val;updatePostField(p,{cat:val});
+  renderList();renderEdit();
+}
+
+function editDate(id,val){
+  const p=posts[id];if(!p||!val)return;
+  p.post_date=val;p.date=new Date(val+'T00:00:00');p.m=p.date.getMonth()+1;
+  updatePostField(p,{post_date:val});
+  renderList();renderEdit();
+}
+
+async function deletePost(id){
+  const p=posts[id];if(!p)return;
+  if(!confirm(`Удалить «${p.title}»?`))return;
+  await deletePostFromDB(p);
+  posts.splice(id,1);posts.forEach((p,i)=>p.id=i);
+  if(selectedPost&&selectedPost.id===id)selectedPost=null;
+  renderList();renderEdit();renderCal();
+}
+
+// ─── MODAL (add new post) ─────────────────────────────────
+let modalCtx='list';
+function openModal(ctx){
+  modalCtx=ctx;
+  const t=new Date();
+  document.getElementById('modal-date').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  document.getElementById('modal-title-input').value='';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-title-input').focus(),50);
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+async function saveModal(){
+  const title=document.getElementById('modal-title-input').value.trim();
+  const cat=document.getElementById('modal-cat').value;
+  const dateStr=document.getElementById('modal-date').value;
+  if(!title||!dateStr)return;
+  const[y,mo,d]=dateStr.split('-').map(Number);
+  const date=new Date(y,mo-1,d);
+  const dow=date.getDay();const dayIdx=dow===0?6:dow-1;
+  const postData={post_key:`custom_${Date.now()}`,week:999,day_index:dayIdx,cat,title,post_date:dateStr,is_custom:true,sort_order:Date.now(),done:false,post_text:''};
+  try{
+    setSyncStatus('сохранение...','saving');
+    const row=await insertPostToDB(postData);
+    const newPost={...postData,...row,id:posts.length,id_db:row.id,date,m:mo,done:false,post_text:''};
+    posts.push(newPost);
+    setSyncStatus('всё сохранено','saved');
+    closeModal();renderList();renderEdit();
+    if(document.getElementById('tab-calendar').style.display!=='none'){calYear=y;calMonth=mo-1;renderCal();}
+    selectPost(newPost.id,modalCtx);
+  }catch(e){setSyncStatus('ошибка','error');}
+}
+</script>
+</body>
+</html>
