@@ -265,6 +265,7 @@ textarea::placeholder{color:var(--text3);}
             <span class="word-count" id="wc-list">0 слов</span>
             <div style="display:flex;gap:6px;">
               <button class="btn" onclick="clearEditor('list')">Очистить</button>
+              <button class="btn" onclick="saveText('list')">Сохранить</button>
               <button class="btn btn-primary" onclick="markDone('list')">Опубликовано ✓</button>
             </div>
           </div>
@@ -321,6 +322,7 @@ textarea::placeholder{color:var(--text3);}
             <span class="word-count" id="wc-cal">0 слов</span>
             <div style="display:flex;gap:6px;">
               <button class="btn" onclick="clearEditor('cal')">Очистить</button>
+              <button class="btn" onclick="saveText('cal')">Сохранить</button>
               <button class="btn btn-primary" onclick="markDone('cal')">Опубликовано ✓</button>
             </div>
           </div>
@@ -516,14 +518,19 @@ function buildMonthPills(){
 
 // ─── SAVE ─────────────────────────────────────────────────
 async function savePostToDB(p){
-  if(!currentUser)return;
+  if(!currentUser||!p.id_db)return;
   setSyncStatus('сохранение...','saving');
-  const payload={done:p.done,post_text:p.post_text||'',updated_at:new Date().toISOString()};
-  if(p.id_db){
-    const{error}=await sb.from('posts').update(payload).eq('id',p.id_db);
-    if(error){setSyncStatus('ошибка','error');return;}
-  }
-  setSyncStatus('всё сохранено','saved');
+  const{error}=await sb.from('posts')
+    .update({done:p.done,post_text:p.post_text||'',updated_at:new Date().toISOString()})
+    .eq('id',p.id_db);
+  if(error){setSyncStatus('ошибка: '+error.message,'error');console.error('savePostToDB',error);return;}
+  setSyncStatus('сохранено','saved');
+}
+
+function saveText(ctx){
+  if(!selectedPost){setSyncStatus('сначала выбери пост','error');return;}
+  selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;
+  savePostToDB(selectedPost);
 }
 
 async function updatePostField(p,fields){
@@ -785,21 +792,36 @@ async function saveModal(){
   const title=document.getElementById('modal-title-input').value.trim();
   const cat=document.getElementById('modal-cat').value;
   const dateStr=document.getElementById('modal-date').value;
-  if(!title||!dateStr)return;
+  if(!title){alert('Введи тему поста');return;}
+  if(!dateStr){alert('Выбери дату');return;}
   const[y,mo,d]=dateStr.split('-').map(Number);
   const date=new Date(y,mo-1,d);
   const dow=date.getDay();const dayIdx=dow===0?6:dow-1;
-  const postData={post_key:`custom_${Date.now()}`,week:999,day_index:dayIdx,cat,title,post_date:dateStr,is_custom:true,sort_order:Date.now(),done:false,post_text:''};
+  const postData={
+    post_key:`custom_${Date.now()}`,
+    week:999,
+    day_index:dayIdx,
+    cat,title,
+    post_date:dateStr,
+    is_custom:true,
+    sort_order:Date.now()
+  };
   try{
     setSyncStatus('сохранение...','saving');
     const row=await insertPostToDB(postData);
     const newPost={...postData,...row,id:posts.length,id_db:row.id,date,m:mo,done:false,post_text:''};
     posts.push(newPost);
-    setSyncStatus('всё сохранено','saved');
-    closeModal();renderList();renderEdit();
+    setSyncStatus('сохранено','saved');
+    closeModal();
+    buildMonthPills();
+    renderList();renderEdit();
     if(document.getElementById('tab-calendar').style.display!=='none'){calYear=y;calMonth=mo-1;renderCal();}
     selectPost(newPost.id,modalCtx);
-  }catch(e){setSyncStatus('ошибка','error');}
+  }catch(e){
+    setSyncStatus('ошибка','error');
+    console.error('saveModal error:',e);
+    alert('Ошибка: '+e.message);
+  }
 }
 </script>
 </body>
