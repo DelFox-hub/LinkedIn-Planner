@@ -503,7 +503,7 @@ function hydratePosts(data){
   return data.map((row,i)=>{
     const d=new Date(row.post_date+'T00:00:00');
     return{...row,id:i,id_db:row.id,date:d,m:d.getMonth()+1,
-      done:row.done||false,post_text:row.post_text||''};
+      done:row.done||false,post_text:row.post_text||'',is_deleted:row.is_deleted||false};
   });
 }
 
@@ -581,6 +581,7 @@ function switchTab(t){
 // ─── LIST ─────────────────────────────────────────────────
 function filteredPosts(){
   return posts.filter(p=>{
+    if(p.is_deleted)return false;
     if(filters.m&&p.m!==filters.m)return false;
     if(filters.c!=='all'&&p.cat!==filters.c)return false;
     if(filters.s==='done'&&!p.done)return false;
@@ -627,6 +628,7 @@ function renderList(){
             <span class="cat-dot ${DOT_CLS[p.cat]}"></span>
             <span class="post-title">${p.title}${p.is_custom?'<span class="custom-badge">своя</span>':''}</span>
             <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
+            <button class="edit-del" onclick="event.stopPropagation();deletePost(${p.id})" title="Скрыть">×</button>
           </div>`;
         });
       });
@@ -696,6 +698,7 @@ function renderCal(){
     const date=new Date(calYear,calMonth,d);
     const ist=date.toDateString()===tod.toDateString();
     const dp=posts.filter(p=>{
+      if(p.is_deleted)return false;
       if(p.date.getFullYear()!==calYear||p.date.getMonth()!==calMonth||p.date.getDate()!==d)return false;
       if(filters.cc!=='all'&&p.cat!==filters.cc)return false;
       if(filters.cs==='done'&&!p.done)return false;
@@ -769,9 +772,14 @@ function editDate(id,val){
 
 async function deletePost(id){
   const p=posts[id];if(!p)return;
-  if(!confirm(`Удалить «${p.title}»?`))return;
-  await deletePostFromDB(p);
-  posts.splice(id,1);posts.forEach((p,i)=>p.id=i);
+  if(!confirm(`Скрыть «${p.title}»?\n\nЗапись останется в базе, но не будет отображаться.`))return;
+  p.is_deleted=true;
+  if(p.id_db){
+    setSyncStatus('сохранение...','saving');
+    const{error}=await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).eq('id',p.id_db);
+    if(error){setSyncStatus('ошибка','error');console.error(error);p.is_deleted=false;return;}
+    setSyncStatus('сохранено','saved');
+  }
   if(selectedPost&&selectedPost.id===id)selectedPost=null;
   renderList();renderEdit();renderCal();
 }
