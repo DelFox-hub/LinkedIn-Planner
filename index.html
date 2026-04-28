@@ -500,7 +500,7 @@ async function loadAndInit(){
 function hydratePosts(data){
   return data.map((row,i)=>{
     const d=new Date(row.post_date+'T00:00:00');
-    return{...row,id:i,date:d,m:d.getMonth()+1,
+    return{...row,id:i,id_db:row.id,date:d,m:d.getMonth()+1,
       done:row.done||false,post_text:row.post_text||''};
   });
 }
