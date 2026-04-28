@@ -804,7 +804,7 @@ async function saveModal(){
     cat,title,
     post_date:dateStr,
     is_custom:true,
-    sort_order:Date.now()
+    sort_order: posts.length + 1000
   };
   try{
     setSyncStatus('сохранение...','saving');
