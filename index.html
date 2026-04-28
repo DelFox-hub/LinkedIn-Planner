@@ -372,7 +372,14 @@ textarea::placeholder{color:var(--text3);}
 <script>
 const SUPA_URL='https://bwtkvfzxiguonhbnosxm.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3dGt2Znp4aWd1b25oYm5vc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzEyNjksImV4cCI6MjA5Mjk0NzI2OX0.W1IjU-C3RSszPRYrHyhoLaBKrTnPd7QwQyyMfJCVOkM';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+// Memory storage — works in Edge without tracking prevention issues
+const memStore={};
+const memStorage={getItem:k=>memStore[k]??null,setItem:(k,v)=>{memStore[k]=v;},removeItem:k=>{delete memStore[k];}};
+
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{
+  auth:{storage:memStorage,autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}
+});
 
 let currentUser=null;
 let posts=[];
@@ -462,8 +469,10 @@ async function loadAndInit(){
     if(!data||data.length===0){
       setLoading('первый запуск — загружаем 182 поста...');
       const defaults=genDefaultPosts();
-      const toInsert=defaults.map(p=>({...p,user_id:currentUser.id}));
-      // Insert in batches of 50
+      const toInsert=defaults.map(p=>{
+        const{m,done,post_text,...dbFields}=p;
+        return{...dbFields,user_id:currentUser.id};
+      });
       for(let i=0;i<toInsert.length;i+=50){
         const {error:ie}=await sb.from('posts').insert(toInsert.slice(i,i+50));
         if(ie)throw ie;
@@ -531,7 +540,8 @@ async function deletePostFromDB(p){
 }
 
 async function insertPostToDB(postData){
-  const{data,error}=await sb.from('posts').insert({...postData,user_id:currentUser.id}).select().single();
+  const{m,done,post_text,date,id,...dbFields}=postData;
+  const{data,error}=await sb.from('posts').insert({...dbFields,user_id:currentUser.id}).select().single();
   if(error)throw error;
   return data;
 }
