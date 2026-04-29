@@ -255,6 +255,12 @@ textarea::placeholder{color:var(--text3);}
         <div><div class="stat-v" id="st-ready">–</div><div class="stat-l">готово</div></div>
         <div><div class="stat-v" id="st-left">–</div><div class="stat-l">осталось</div></div>
         <div><div class="stat-v" id="st-vis">–</div><div class="stat-l">показано</div></div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button class="btn" id="btn-select-all" onclick="toggleSelectAll()">Выбрать все</button>
+          <span id="list-sel-count" style="font-size:11px;color:var(--text3);display:none"></span>
+          <button class="btn" id="btn-bulk-bank" onclick="bulkToBank()" style="display:none">→ Банк идей</button>
+          <button class="btn btn-danger" id="btn-bulk-delete" onclick="bulkDelete()" style="display:none">Скрыть</button>
+        </div>
       </div>
       <div class="content-layout">
         <div class="list-panel" id="list-container"></div>
@@ -370,6 +376,62 @@ let currentUser=null,posts=[],saveTimer=null,selectedPost=null,selectedCtx='list
 const filters={m:0,c:'all',s:'all',cc:'all'};
 const _today=new Date();let calYear=_today.getFullYear(),calMonth=_today.getMonth();
 const selectedForEdit=new Set();
+const listSelected=new Set();
+
+function toggleListSel(id_db,checked){
+  if(checked)listSelected.add(id_db);else listSelected.delete(id_db);
+  updateListSelUI();
+}
+
+function updateListSelUI(){
+  const n=listSelected.size;
+  const countEl=document.getElementById('list-sel-count');
+  const bankBtn=document.getElementById('btn-bulk-bank');
+  const delBtn=document.getElementById('btn-bulk-delete');
+  const selBtn=document.getElementById('btn-select-all');
+  if(countEl)countEl.style.display=n?'':'none';
+  if(countEl)countEl.textContent=`Выбрано: ${n}`;
+  if(bankBtn)bankBtn.style.display=n?'':'none';
+  if(delBtn)delBtn.style.display=n?'':'none';
+  if(selBtn)selBtn.textContent=n&&n===filteredPosts().length?'Снять все':'Выбрать все';
+}
+
+function toggleSelectAll(){
+  const f=filteredPosts();
+  const allSelected=f.every(p=>listSelected.has(p.id_db));
+  if(allSelected){f.forEach(p=>listSelected.delete(p.id_db));}
+  else{f.forEach(p=>listSelected.add(p.id_db));}
+  renderList();
+  updateListSelUI();
+}
+
+async function bulkToBank(){
+  if(!listSelected.size)return;
+  if(!confirm(`Убрать дату у ${listSelected.size} постов? Они перейдут в Банк идей.`))return;
+  setSyncStatus('сохранение...','saving');
+  for(const id_db of listSelected){
+    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
+    p.post_date=null;p.date=null;p.m=null;
+    await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).eq('id',id_db);
+  }
+  listSelected.clear();
+  setSyncStatus('сохранено','saved');
+  buildMonthPills();renderList();renderBank();renderEdit();renderCal();
+}
+
+async function bulkDelete(){
+  if(!listSelected.size)return;
+  if(!confirm(`Скрыть ${listSelected.size} постов?`))return;
+  setSyncStatus('сохранение...','saving');
+  for(const id_db of listSelected){
+    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
+    p.is_deleted=true;
+    await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).eq('id',id_db);
+  }
+  listSelected.clear();
+  setSyncStatus('сохранено','saved');
+  renderList();renderBank();renderEdit();renderCal();renderLab();
+}
 
 const MN=['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const MN_SHORT=['','Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
@@ -545,6 +607,7 @@ function renderList(){
           const done=['published','reviewed'].includes(p.status);
           const ist=p.date&&p.date.toDateString()===ts;
           h+=`<div class="post-row${done?' done':''}${sel?' selected':''}${ist?' today-hl':''}" onclick="selectPost('${p.id_db}','list')">
+            <input type="checkbox" class="sel-cb" ${listSelected.has(p.id_db)?'checked':''} onclick="event.stopPropagation();toggleListSel('${p.id_db}',this.checked)">
             <div class="cb" onclick="event.stopPropagation();quickStatus('${p.id_db}')">
               <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
