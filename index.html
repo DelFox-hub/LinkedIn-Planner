@@ -409,11 +409,10 @@ async function bulkToBank(){
   if(!listSelected.size)return;
   if(!confirm(`Убрать дату у ${listSelected.size} постов? Они перейдут в Банк идей.`))return;
   setSyncStatus('сохранение...','saving');
-  for(const id_db of listSelected){
-    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
-    p.post_date=null;p.date=null;p.m=null;
-    await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).eq('id',id_db);
-  }
+  const ids=[...listSelected];
+  const{error}=await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).in('id',ids);
+  if(error){setSyncStatus('ошибка','error');console.error(error);return;}
+  ids.forEach(id_db=>{const p=posts.find(x=>x.id_db===id_db);if(p){p.post_date=null;p.date=null;p.m=null;}});
   listSelected.clear();
   setSyncStatus('сохранено','saved');
   buildMonthPills();renderList();renderBank();renderEdit();renderCal();
@@ -423,11 +422,10 @@ async function bulkDelete(){
   if(!listSelected.size)return;
   if(!confirm(`Скрыть ${listSelected.size} постов?`))return;
   setSyncStatus('сохранение...','saving');
-  for(const id_db of listSelected){
-    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
-    p.is_deleted=true;
-    await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).eq('id',id_db);
-  }
+  const ids=[...listSelected];
+  const{error}=await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).in('id',ids);
+  if(error){setSyncStatus('ошибка','error');console.error(error);return;}
+  ids.forEach(id_db=>{const p=posts.find(x=>x.id_db===id_db);if(p)p.is_deleted=true;});
   listSelected.clear();
   setSyncStatus('сохранено','saved');
   renderList();renderBank();renderEdit();renderCal();renderLab();
@@ -926,11 +924,10 @@ async function removeSelectedDates(){
   if(!selectedForEdit.size)return;
   if(!confirm(`Убрать дату у ${selectedForEdit.size} постов? Они перейдут в Банк идей.`))return;
   setSyncStatus('сохранение...','saving');
-  for(const id_db of selectedForEdit){
-    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
-    p.post_date=null;p.date=null;p.m=null;
-    await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).eq('id',id_db);
-  }
+  const ids=[...selectedForEdit];
+  const{error}=await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).in('id',ids);
+  if(error){setSyncStatus('ошибка','error');console.error(error);return;}
+  ids.forEach(id_db=>{const p=posts.find(x=>x.id_db===id_db);if(p){p.post_date=null;p.date=null;p.m=null;}});
   selectedForEdit.clear();
   setSyncStatus('сохранено','saved');
   buildMonthPills();renderList();renderBank();renderEdit();renderCal();
