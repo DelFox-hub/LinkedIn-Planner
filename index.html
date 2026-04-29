@@ -3,43 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkedIn Planner</title>
+<title>LinkedIn Growth Planner</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd7;--border2:#ccc8c0;
-  --text:#1a1814;--text2:#6b6560;--text3:#a09a93;--accent:#1a4d8f;--accent-light:#e8eef8;
-  --case:#1a4d8f;--case-bg:#e8eef8;--tip:#7a4f1a;--tip-bg:#f8efe8;
-  --truth:#8f1a1a;--truth-bg:#f8e8e8;--process:#1a6b3a;--process-bg:#e8f5ee;
-  --personal:#4a1a7a;--personal-bg:#f0e8f8;--radius:8px;--radius-lg:14px;
-  --green:#1a6b3a;--green-bg:#e8f5ee;
-}
+:root{--bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd7;--border2:#ccc8c0;--text:#1a1814;--text2:#6b6560;--text3:#a09a93;--accent:#1a4d8f;--accent-light:#e8eef8;--case:#1a4d8f;--case-bg:#e8eef8;--tip:#7a4f1a;--tip-bg:#f8efe8;--truth:#8f1a1a;--truth-bg:#f8e8e8;--process:#1a6b3a;--process-bg:#e8f5ee;--personal:#4a1a7a;--personal-bg:#f0e8f8;--green:#1a6b3a;--green-bg:#e8f5ee;--radius:8px;--radius-lg:14px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
-
 /* AUTH */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
 .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 32px;width:360px;max-width:100%;}
 .auth-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:300;margin-bottom:6px;}
-.auth-sub{font-size:11px;color:var(--text3);margin-bottom:28px;letter-spacing:.03em;}
+.auth-sub{font-size:11px;color:var(--text3);margin-bottom:28px;}
 .form-row{margin-bottom:14px;}
 .form-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:block;}
-.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;transition:border-color .12s;}
-.form-input:focus{border-color:var(--accent);}
-.form-select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a09a93' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;transition:border-color .12s;}
+.form-input:focus,.form-select:focus{border-color:var(--accent);}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a09a93' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
 .btn{font-size:11px;padding:6px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;}
 .btn:hover{border-color:var(--border2);color:var(--text);}
 .btn-primary{background:var(--text);color:var(--surface);border-color:var(--text);}
 .btn-primary:hover{background:#333;}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 .btn-danger{background:#f8e8e8;color:var(--truth);border-color:#f0c0c0;}
-.btn-danger:hover{background:#f0c0c0;}
 .auth-btn-full{width:100%;padding:10px;font-size:12px;margin-top:4px;}
 .auth-msg{font-size:11px;margin-top:12px;padding:8px 10px;border-radius:var(--radius);display:none;}
 .auth-msg.error{background:#f8e8e8;color:var(--truth);display:block;}
 .auth-msg.success{background:var(--green-bg);color:var(--green);display:block;}
-
 /* LOADING */
 .loading-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
 .loading-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:var(--text2);}
@@ -47,27 +37,24 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-
 .loading-fill{height:100%;background:var(--accent);border-radius:2px;animation:loadfill 1.5s ease-in-out infinite;}
 @keyframes loadfill{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
 .loading-text{font-size:11px;color:var(--text3);}
-
 /* APP */
-.app{max-width:1200px;margin:0 auto;padding:20px;}
+.app{max-width:1280px;margin:0 auto;padding:20px;}
 .app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .app-logo{font-family:'Fraunces',serif;font-size:24px;font-weight:300;letter-spacing:-.5px;}
 .header-right{display:flex;align-items:center;gap:12px;}
 .user-email{font-size:11px;color:var(--text3);}
-.sync-status{font-size:10px;color:var(--text3);letter-spacing:.03em;min-width:80px;text-align:right;}
+.sync-status{font-size:10px;color:var(--text3);min-width:90px;text-align:right;}
 .sync-status.saving{color:var(--tip);}
 .sync-status.saved{color:var(--green);}
 .sync-status.error{color:var(--truth);}
-
 /* TABS */
 .tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--surface2);border-radius:var(--radius);padding:3px;width:fit-content;}
-.tab-btn{padding:7px 20px;border:none;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:6px;transition:all .15s;letter-spacing:.03em;}
+.tab-btn{padding:7px 18px;border:none;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:6px;transition:all .12s;}
 .tab-btn.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-
 /* FILTERS */
 .filter-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center;}
 .filter-label{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-right:2px;}
-.pill{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Mono',monospace;}
+.pill{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;}
 .pill:hover{border-color:var(--border2);color:var(--text);}
 .pill.on{background:var(--text);color:var(--surface);border-color:var(--text);}
 .pill.on.cat-case{background:var(--case);border-color:var(--case);color:#fff;}
@@ -76,108 +63,127 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-
 .pill.on.cat-process{background:var(--process);border-color:var(--process);color:#fff;}
 .pill.on.cat-personal{background:var(--personal);border-color:var(--personal);color:#fff;}
 .sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
-
 /* STATS */
-.stats-bar{display:flex;gap:20px;margin-bottom:14px;padding:10px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);}
+.stats-bar{display:flex;gap:18px;margin-bottom:14px;padding:10px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);flex-wrap:wrap;}
 .stat-v{font-size:18px;font-weight:500;color:var(--text);font-family:'Fraunces',serif;}
 .stat-l{font-size:10px;color:var(--text3);letter-spacing:.04em;margin-top:1px;}
-
-/* CONTENT LAYOUT */
-.content-layout{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start;}
-
+/* LAYOUT */
+.content-layout,.cal-layout{display:grid;grid-template-columns:1fr 380px;gap:14px;align-items:start;}
 /* LIST */
-.list-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.list-panel,.editor-panel,.cal-panel,.edit-panel,.lab-panel,.bank-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.editor-panel{position:sticky;top:16px;overflow:visible;}
 .month-head{padding:9px 16px;background:var(--surface2);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);font-weight:500;}
-.week-head{padding:5px 16px;font-size:10px;color:var(--text3);letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--surface);}
-.post-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
-.post-row:last-child{border-bottom:none;}
+.week-head{padding:5px 16px;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--surface);}
+.post-row{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
 .post-row:hover{background:var(--bg);}
 .post-row.selected{background:var(--accent-light);}
 .post-row.done .post-title{color:var(--text3);text-decoration:line-through;}
 .post-row.today-hl{background:#fffde8;}
-.cb{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;cursor:pointer;}
+.cb{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;}
 .post-row.done .cb{background:var(--accent);border-color:var(--accent);}
 .cb svg{display:none;}
 .post-row.done .cb svg{display:block;}
+.sel-cb{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;cursor:pointer;accent-color:var(--accent);}
 .day-tag{font-size:10px;font-weight:500;color:var(--text3);min-width:20px;}
 .cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .dot-case{background:var(--case);}.dot-tip{background:var(--tip);}.dot-truth{background:var(--truth);}.dot-process{background:var(--process);}.dot-personal{background:var(--personal);}
 .post-title{flex:1;font-size:12px;color:var(--text);line-height:1.4;}
-.cat-badge{font-size:10px;padding:2px 7px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
+.cat-badge,.goal-badge,.status-badge{font-size:10px;padding:2px 7px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
 .cat-case{color:var(--case);background:var(--case-bg);}
 .cat-tip{color:var(--tip);background:var(--tip-bg);}
 .cat-truth{color:var(--truth);background:var(--truth-bg);}
 .cat-process{color:var(--process);background:var(--process-bg);}
 .cat-personal{color:var(--personal);background:var(--personal-bg);}
+.goal-badge{background:var(--surface2);color:var(--text2);}
+.status-badge{background:var(--surface2);color:var(--text2);}
+.status-published{background:var(--green-bg);color:var(--green);}
+.status-ready{background:#e8f0fe;color:#1a4d8f;}
+.status-draft{background:#fef8e8;color:#7a4f1a;}
 .custom-badge{font-size:9px;padding:1px 5px;border-radius:6px;background:var(--surface2);color:var(--text3);margin-left:4px;}
-
 /* EDITOR */
-.editor-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);position:sticky;top:16px;}
 .editor-header{padding:14px 16px 12px;border-bottom:1px solid var(--border);}
-.editor-topic{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:6px;font-family:'Fraunces',serif;}
-.editor-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.editor-topic{font-family:'Fraunces',serif;font-size:15px;font-weight:300;color:var(--text);line-height:1.35;margin-bottom:8px;}
+.editor-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .editor-body{padding:14px 16px;}
-.editor-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
-textarea{width:100%;height:240px;border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);resize:vertical;outline:none;line-height:1.7;transition:border-color .12s;}
+.editor-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block;}
+textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);resize:vertical;outline:none;line-height:1.7;transition:border-color .12s;}
 textarea:focus{border-color:var(--accent);}
 textarea::placeholder{color:var(--text3);}
-.editor-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;justify-content:space-between;}
+.editor-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
 .word-count{font-size:10px;color:var(--text3);}
 .add-idea-btn{width:100%;padding:8px;border:1px dashed var(--border2);border-radius:var(--radius);background:transparent;color:var(--text3);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .12s;}
 .add-idea-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
-
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.editor-grid .form-row{margin-bottom:0;}
+.small-input{padding:7px 8px;font-size:11px;}
+.hint-box{font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 10px;line-height:1.6;margin-bottom:12px;}
+.hook-line{display:flex;gap:7px;align-items:center;font-size:10px;color:var(--text3);margin-top:6px;}
+.hook-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+.hook-dot.ok{background:var(--green);}
+.hook-dot.bad{background:var(--truth);}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.metric-field{display:flex;flex-direction:column;gap:3px;}
+.metric-label{font-size:9px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;}
+.metric-input{padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--bg);outline:none;width:100%;}
+.metric-input:focus{border-color:var(--accent);}
 /* CALENDAR */
-.cal-layout{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start;}
-.cal-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
 .cal-month-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
 .cal-month-title{font-family:'Fraunces',serif;font-size:19px;font-weight:300;}
 .nav-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);transition:all .12s;}
 .nav-btn:hover{border-color:var(--border2);color:var(--text);}
-.cal-headers{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);background:var(--surface2);}
-.cal-day-header{padding:9px 4px;text-align:center;font-size:10px;letter-spacing:.05em;color:var(--text2);font-weight:500;text-transform:uppercase;}
-.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-headers,.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-headers{border-bottom:1px solid var(--border);background:var(--surface2);}
+.cal-day-header{padding:9px 4px;text-align:center;font-size:10px;color:var(--text2);font-weight:500;text-transform:uppercase;}
 .cal-cell{min-height:115px;padding:7px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);}
 .cal-cell:nth-child(7n){border-right:none;}
 .cal-cell.other-month{background:var(--bg);}
-.cal-date-num{font-size:11px;font-weight:500;color:var(--text3);margin-bottom:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.cal-date-num{font-size:11px;color:var(--text3);margin-bottom:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
 .cal-cell.today .cal-date-num{background:var(--accent);color:#fff;font-weight:600;}
-.cal-cell.other-month .cal-date-num{color:var(--border2);}
-.cal-post{font-size:10px;padding:3px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;line-height:1.4;transition:all .1s;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;border-left:2px solid transparent;}
+.cal-post{font-size:10px;padding:3px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;border-left:2px solid transparent;transition:all .1s;}
 .cal-post:hover{filter:brightness(.93);}
 .cal-post.done{opacity:.4;text-decoration:line-through;}
 .cal-post.selected-post{outline:2px solid var(--accent);outline-offset:1px;}
 .cal-legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;border-top:1px solid var(--border);background:var(--surface2);}
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);}
-.cal-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-
+.cal-legend-dot{width:7px;height:7px;border-radius:50%;}
+/* LAB */
+.lab-panel{padding:20px;}
+.lab-title{font-family:'Fraunces',serif;font-size:20px;font-weight:300;margin-bottom:8px;}
+.lab-desc{font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:18px;line-height:1.6;}
+.lab-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.lab-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.lab-card strong{font-family:'Fraunces',serif;font-size:24px;font-weight:300;display:block;margin-bottom:4px;}
+.lab-card span{font-size:11px;color:var(--text2);}
+.lab-table{width:100%;border-collapse:collapse;font-size:11px;}
+.lab-table th,.lab-table td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;}
+.lab-table th{background:var(--surface2);color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:.05em;}
+.lab-table tr.winner td{background:var(--green-bg);}
+/* BANK */
+.bank-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.bank-toolbar-left{font-size:11px;color:var(--text2);}
+.bank-row{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.bank-row:hover{background:var(--bg);}
+.bank-row.selected{background:var(--accent-light);}
 /* EDIT TAB */
-.edit-panel{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
 .edit-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
-.edit-toolbar-title{font-size:12px;font-weight:500;color:var(--text2);}
-.edit-row{display:grid;grid-template-columns:60px 80px 1fr 100px 36px;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);transition:background .1s;}
-.edit-row:hover{background:var(--bg);}
-.edit-row:last-child{border-bottom:none;}
-.edit-input{width:100%;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:transparent;outline:none;transition:all .12s;}
-.edit-input:hover{border-color:var(--border);}
-.edit-input:focus{border-color:var(--accent);background:var(--bg);}
-.edit-select{width:100%;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:transparent;outline:none;cursor:pointer;transition:all .12s;appearance:none;}
-.edit-select:hover{border-color:var(--border);}
-.edit-select:focus{border-color:var(--accent);background:var(--bg);}
-.edit-date{font-size:10px;color:var(--text3);}
-.edit-del{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .12s;flex-shrink:0;}
-.edit-del:hover{background:#f8e8e8;color:var(--truth);}
-.edit-add-row{display:flex;gap:8px;align-items:center;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface2);}
 .edit-section-head{padding:8px 16px;background:var(--surface2);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);}
-
+.edit-row{display:grid;grid-template-columns:50px 80px 80px 1fr 110px 28px;gap:6px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);transition:background .1s;}
+.edit-row:hover{background:var(--bg);}
+.edit-input,.edit-select{width:100%;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:transparent;outline:none;transition:all .12s;}
+.edit-input:hover,.edit-select:hover,.edit-input:focus,.edit-select:focus{border-color:var(--accent);background:var(--bg);}
+.edit-date{font-size:10px;color:var(--text3);}
+.edit-del{width:24px;height:24px;border-radius:5px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.edit-del:hover{background:#f8e8e8;color:var(--truth);}
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,24,20,.45);z-index:100;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:400px;max-width:94vw;padding:24px;animation:modalIn .15s ease;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:430px;max-width:94vw;padding:24px;animation:modalIn .15s ease;}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-title{font-family:'Fraunces',serif;font-size:17px;font-weight:300;margin-bottom:18px;}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
 .no-results{padding:30px;text-align:center;color:var(--text3);font-size:12px;}
 .today-hl{background:#fffde8!important;}
+@media(max-width:960px){.content-layout,.cal-layout{grid-template-columns:1fr;}.editor-panel{position:static;}.lab-grid{grid-template-columns:1fr 1fr;}.edit-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -185,33 +191,27 @@ textarea::placeholder{color:var(--text3);}
 <!-- AUTH -->
 <div id="auth-screen" class="auth-wrap">
   <div class="auth-card">
-    <div class="auth-logo">LinkedIn Planner</div>
-    <div class="auth-sub">твоя система · 6 месяцев · 182 поста</div>
-    <div class="form-row">
-      <label class="form-label">Email</label>
-      <input class="form-input" id="auth-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
-    <div class="form-row">
-      <label class="form-label">Пароль</label>
-      <input class="form-input" id="auth-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
+    <div class="auth-logo">LinkedIn Growth Planner</div>
+    <div class="auth-sub">контент · метрики · рост</div>
+    <div class="form-row"><label class="form-label">Email</label><input class="form-input" id="auth-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()"></div>
+    <div class="form-row"><label class="form-label">Пароль</label><input class="form-input" id="auth-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()"></div>
     <button class="btn btn-primary auth-btn-full" id="auth-btn" onclick="authSubmit()">Войти</button>
     <div class="auth-msg" id="auth-msg"></div>
   </div>
 </div>
 
 <!-- LOADING -->
-<div id="loading-screen" class="loading-screen" style="display:none;">
-  <div class="loading-logo">LinkedIn Planner</div>
+<div id="loading-screen" class="loading-screen" style="display:none">
+  <div class="loading-logo">LinkedIn Growth Planner</div>
   <div class="loading-bar"><div class="loading-fill"></div></div>
-  <div class="loading-text" id="loading-text">загрузка постов...</div>
+  <div class="loading-text" id="loading-text">загрузка...</div>
 </div>
 
 <!-- APP -->
-<div id="app-screen" style="display:none;">
+<div id="app-screen" style="display:none">
   <div class="app">
     <div class="app-header">
-      <div class="app-logo">LinkedIn Planner</div>
+      <div class="app-logo">LinkedIn Growth Planner</div>
       <div class="header-right">
         <span class="sync-status" id="sync-status"></span>
         <span class="user-email" id="user-email"></span>
@@ -220,12 +220,14 @@ textarea::placeholder{color:var(--text3);}
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('list')">Список</button>
+      <button class="tab-btn active" onclick="switchTab('list')">План</button>
+      <button class="tab-btn" onclick="switchTab('bank')">Банк идей</button>
       <button class="tab-btn" onclick="switchTab('calendar')">Календарь</button>
+      <button class="tab-btn" onclick="switchTab('lab')">Лаборатория</button>
       <button class="tab-btn" onclick="switchTab('edit')">Редактировать</button>
     </div>
 
-    <!-- LIST TAB -->
+    <!-- ПЛАН -->
     <div id="tab-list">
       <div class="filter-bar">
         <span class="filter-label">Месяц</span>
@@ -241,41 +243,39 @@ textarea::placeholder{color:var(--text3);}
         <span class="pill cat-personal" data-g="c" data-v="personal" onclick="setFilter(this)">Личное</span>
         <div class="sep"></div>
         <span class="pill on" data-g="s" data-v="all" onclick="setFilter(this)">Все</span>
-        <span class="pill" data-g="s" data-v="todo" onclick="setFilter(this)">Не опубл.</span>
-        <span class="pill" data-g="s" data-v="done" onclick="setFilter(this)">Опубл.</span>
+        <span class="pill" data-g="s" data-v="idea" onclick="setFilter(this)">Идея</span>
+        <span class="pill" data-g="s" data-v="draft" onclick="setFilter(this)">Черновик</span>
+        <span class="pill" data-g="s" data-v="ready" onclick="setFilter(this)">Готово</span>
+        <span class="pill" data-g="s" data-v="published" onclick="setFilter(this)">Опубл.</span>
+        <span class="pill" data-g="s" data-v="reviewed" onclick="setFilter(this)">Разобрано</span>
       </div>
       <div class="stats-bar">
         <div><div class="stat-v" id="st-total">–</div><div class="stat-l">всего</div></div>
-        <div><div class="stat-v" id="st-done">0</div><div class="stat-l">опубл.</div></div>
+        <div><div class="stat-v" id="st-published">0</div><div class="stat-l">опубл.</div></div>
+        <div><div class="stat-v" id="st-ready">–</div><div class="stat-l">готово</div></div>
         <div><div class="stat-v" id="st-left">–</div><div class="stat-l">осталось</div></div>
         <div><div class="stat-v" id="st-vis">–</div><div class="stat-l">показано</div></div>
       </div>
       <div class="content-layout">
         <div class="list-panel" id="list-container"></div>
-        <div class="editor-panel">
-          <div class="editor-header">
-            <div class="editor-topic" id="editor-topic-list" style="color:var(--text3);font-style:italic;font-weight:300;">Выбери пост из списка</div>
-            <div class="editor-meta" id="editor-meta-list"></div>
-          </div>
-          <div class="editor-body">
-            <div class="editor-label">Текст публикации</div>
-            <textarea id="textarea-list" placeholder="Напиши текст поста...&#10;&#10;Зацеп → контекст → действие → результат → CTA"></textarea>
-          </div>
-          <div class="editor-footer">
-            <span class="word-count" id="wc-list">0 слов</span>
-            <div style="display:flex;gap:6px;">
-              <button class="btn" onclick="clearEditor('list')">Очистить</button>
-              <button class="btn" onclick="saveText('list')">Сохранить</button>
-              <button class="btn btn-primary" onclick="markDone('list')">Опубликовано ✓</button>
-            </div>
-          </div>
-          <div style="padding:0 16px 14px;"><button class="add-idea-btn" onclick="openModal('list')">+ добавить свою идею</button></div>
-        </div>
+        <div class="editor-panel" id="editor-list"></div>
       </div>
     </div>
 
-    <!-- CALENDAR TAB -->
-    <div id="tab-calendar" style="display:none;">
+    <!-- БАНК ИДЕЙ -->
+    <div id="tab-bank" style="display:none">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--text3)">Посты без даты — идеи на будущее. Назначь дату чтобы переместить в план.</span>
+        <button class="btn btn-primary" onclick="openModal('bank')">+ Добавить идею</button>
+      </div>
+      <div class="content-layout">
+        <div class="bank-panel" id="bank-container"></div>
+        <div class="editor-panel" id="editor-bank"></div>
+      </div>
+    </div>
+
+    <!-- КАЛЕНДАРЬ -->
+    <div id="tab-calendar" style="display:none">
       <div class="filter-bar">
         <span class="filter-label">Рубрика</span>
         <span class="pill on" data-g="cc" data-v="all" onclick="setFilter(this)">Все</span>
@@ -284,10 +284,6 @@ textarea::placeholder{color:var(--text3);}
         <span class="pill cat-truth" data-g="cc" data-v="truth" onclick="setFilter(this)">Правда</span>
         <span class="pill cat-process" data-g="cc" data-v="process" onclick="setFilter(this)">Процесс</span>
         <span class="pill cat-personal" data-g="cc" data-v="personal" onclick="setFilter(this)">Личное</span>
-        <div class="sep"></div>
-        <span class="pill on" data-g="cs" data-v="all" onclick="setFilter(this)">Все</span>
-        <span class="pill" data-g="cs" data-v="todo" onclick="setFilter(this)">Не опубл.</span>
-        <span class="pill" data-g="cs" data-v="done" onclick="setFilter(this)">Опубл.</span>
       </div>
       <div class="cal-layout">
         <div class="cal-panel">
@@ -295,46 +291,44 @@ textarea::placeholder{color:var(--text3);}
             <button class="nav-btn" onclick="calPrev()">&#8592;</button>
             <div style="display:flex;align-items:center;gap:10px;">
               <span class="cal-month-title" id="cal-title"></span>
-              <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="goToday()">Сегодня</button>
+              <button class="btn" onclick="goToday()">Сегодня</button>
             </div>
             <button class="nav-btn" onclick="calNext()">&#8594;</button>
           </div>
           <div class="cal-headers" id="cal-headers"></div>
           <div class="cal-body" id="cal-grid"></div>
           <div class="cal-legend">
-            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--case)"></span>Кейс (пн)</div>
-            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--tip)"></span>Совет (вт/чт/сб)</div>
-            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--truth)"></span>Правда (ср)</div>
-            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--process)"></span>Процесс (пт)</div>
-            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--personal)"></span>Личное (вс)</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--case)"></span>Кейс</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--tip)"></span>Совет</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--truth)"></span>Правда</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--process)"></span>Процесс</div>
+            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:var(--personal)"></span>Личное</div>
           </div>
         </div>
-        <div class="editor-panel">
-          <div class="editor-header">
-            <div class="editor-topic" id="editor-topic-cal" style="color:var(--text3);font-style:italic;font-weight:300;">Выбери день в календаре</div>
-            <div class="editor-meta" id="editor-meta-cal"></div>
-          </div>
-          <div class="editor-body">
-            <div class="editor-label">Текст публикации</div>
-            <textarea id="textarea-cal" placeholder="Напиши текст поста..."></textarea>
-          </div>
-          <div class="editor-footer">
-            <span class="word-count" id="wc-cal">0 слов</span>
-            <div style="display:flex;gap:6px;">
-              <button class="btn" onclick="clearEditor('cal')">Очистить</button>
-              <button class="btn" onclick="saveText('cal')">Сохранить</button>
-              <button class="btn btn-primary" onclick="markDone('cal')">Опубликовано ✓</button>
-            </div>
-          </div>
-          <div style="padding:0 16px 14px;"><button class="add-idea-btn" onclick="openModal('cal')">+ добавить свою идею</button></div>
-        </div>
+        <div class="editor-panel" id="editor-cal"></div>
       </div>
     </div>
 
-    <!-- EDIT TAB -->
-    <div id="tab-edit" style="display:none;">
-      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:11px;color:var(--text3);">Редактируй темы, рубрики, даты. Изменения сохраняются сразу.</span>
+    <!-- ЛАБОРАТОРИЯ -->
+    <div id="tab-lab" style="display:none">
+      <div class="lab-panel">
+        <div class="lab-title">Лаборатория роста</div>
+        <div class="lab-desc">Здесь не красота, а обратная связь. Какие форматы дают показы, переходы в профиль и диалоги — те и масштабируй. 6 месяцев плана — это гипотезы. Метрики скажут, что работает.</div>
+        <div class="lab-grid" id="lab-cards"></div>
+        <table class="lab-table">
+          <thead><tr><th>Пост</th><th>Цель</th><th>Показы</th><th>Реакции</th><th>Комм.</th><th>Профиль</th><th>Диалоги</th><th>ER%</th></tr></thead>
+          <tbody id="lab-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- РЕДАКТИРОВАТЬ -->
+    <div id="tab-edit" style="display:none">
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--text3)" id="edit-sel-count"></span>
+          <button class="btn" id="btn-remove-date" onclick="removeSelectedDates()" style="display:none">→ Банк идей</button>
+        </div>
         <button class="btn btn-primary" onclick="openModal('edit')">+ Добавить пост</button>
       </div>
       <div class="edit-panel" id="edit-container"></div>
@@ -346,24 +340,18 @@ textarea::placeholder{color:var(--text3);}
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="modal-title-text">Добавить пост</div>
-    <div class="form-row">
-      <label class="form-label">Тема / заголовок</label>
-      <input class="form-input" id="modal-title-input" type="text" placeholder="Как я ускорила дашборд на 40%">
-    </div>
-    <div class="form-row">
-      <label class="form-label">Рубрика</label>
+    <div class="form-row"><label class="form-label">Тема</label><input class="form-input" id="modal-title-input" type="text" placeholder="Как я сократила отчётность в 16 раз"></div>
+    <div class="form-row"><label class="form-label">Рубрика</label>
       <select class="form-select" id="modal-cat">
-        <option value="case">Кейс</option>
-        <option value="tip">Совет</option>
-        <option value="truth">Грязная правда</option>
-        <option value="process">Процесс</option>
-        <option value="personal">Личное</option>
+        <option value="case">Кейс</option><option value="tip">Совет</option><option value="truth">Грязная правда</option><option value="process">Процесс</option><option value="personal">Личное</option>
       </select>
     </div>
-    <div class="form-row">
-      <label class="form-label">Дата</label>
-      <input class="form-input" id="modal-date" type="date">
+    <div class="form-row"><label class="form-label">Цель</label>
+      <select class="form-select" id="modal-goal">
+        <option value="trust">Доверие</option><option value="reach">Охват</option><option value="profile">Переходы в профиль</option><option value="dialogue">Диалоги</option><option value="recruiters">Рекрутеры</option>
+      </select>
     </div>
+    <div class="form-row" id="modal-date-row"><label class="form-label">Дата <span style="color:var(--text3)">(оставь пустым → Банк идей)</span></label><input class="form-input" id="modal-date" type="date"></div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal()">Отмена</button>
       <button class="btn btn-primary" onclick="saveModal()">Добавить</button>
@@ -374,59 +362,64 @@ textarea::placeholder{color:var(--text3);}
 <script>
 const SUPA_URL='https://bwtkvfzxiguonhbnosxm.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3dGt2Znp4aWd1b25oYm5vc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzEyNjksImV4cCI6MjA5Mjk0NzI2OX0.W1IjU-C3RSszPRYrHyhoLaBKrTnPd7QwQyyMfJCVOkM';
-
-// Memory storage — works in Edge without tracking prevention issues
 const memStore={};
 const memStorage={getItem:k=>memStore[k]??null,setItem:(k,v)=>{memStore[k]=v;},removeItem:k=>{delete memStore[k];}};
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:memStorage,autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{
-  auth:{storage:memStorage,autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}
-});
+let currentUser=null,posts=[],saveTimer=null,selectedPost=null,selectedCtx='list';
+const filters={m:0,c:'all',s:'all',cc:'all'};
+const _today=new Date();let calYear=_today.getFullYear(),calMonth=_today.getMonth();
+const selectedForEdit=new Set();
 
-let currentUser=null;
-let posts=[];
-let saveTimer=null;
-let selectedPost=null,selectedCtx='list';
-const filters={m:0,c:'all',s:'all',cc:'all',cs:'all'};
-const _today=new Date();
-let calYear=_today.getFullYear(),calMonth=_today.getMonth();
+const MN=['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MN_SHORT=['','Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const MONTH_NAMES_RU=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const CAT_NAME={case:'Кейс',truth:'Правда',process:'Процесс',tip:'Совет',personal:'Личное'};
+const CAT_CLS={case:'cat-case',truth:'cat-truth',process:'cat-process',tip:'cat-tip',personal:'cat-personal'};
+const DOT_CLS={case:'dot-case',truth:'dot-truth',process:'dot-process',tip:'dot-tip',personal:'dot-personal'};
+const GOALS={trust:'Доверие',reach:'Охват',profile:'Профиль→',dialogue:'Диалоги',recruiters:'Рекрутеры'};
+const STATUSES={idea:'Идея',draft:'Черновик',ready:'Готово',published:'Опубликовано',reviewed:'Разобрано'};
+const STATUS_CLS={idea:'',draft:'status-draft',ready:'status-ready',published:'status-published',reviewed:'status-published'};
 
-const MN=["","Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
-const MN_SHORT=["","Янв","Фев","Март","Апр","Май","Июнь","Июль","Авг","Сент","Окт","Ноя","Дек"];
-const MONTH_NAMES_RU=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
-const DAYS=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
-const CATS_BY_DAY=["case","tip","truth","tip","process","tip","personal"];
-const CAT_NAME={case:"Кейс",truth:"Правда",process:"Процесс",tip:"Совет",personal:"Личное"};
-const CAT_CLS={case:"cat-case",truth:"cat-truth",process:"cat-process",tip:"cat-tip",personal:"cat-personal"};
-const DOT_CLS={case:"dot-case",truth:"dot-truth",process:"dot-process",tip:"dot-tip",personal:"dot-personal"};
-
-// Default titles
 const T={
-case:["Как я сократила время закрытия отчёта в 16 раз","Power BI для нетехнической команды: с чего начать","ETL без программиста: мой подход в Power Query","Как я выстроила единый источник правды для 3 отделов","Автоматизация согласований через Bitrix и Telegram","Дашборд по продажам: от хаоса к системе за 2 недели","Как я внедрила RLS без участия IT-отдела","Отчётность в страховой компании: специфика и нюансы","Кейс: воронка продаж в BI — как это выглядит изнутри","Как я автоматизировала сбор данных из 6 источников","Power BI Service: настройка шлюза без боли","Кейс: Telegram-бот для команды из 50 человек","Как я перестроила отчётность под новую оргструктуру","Дашборд, которым пользуются каждый день","Кейс: внедрила систему KPI с нуля за 3 месяца","Данные из CRM как основа для принятия решений","Аналитика для маркетинга: что попросили vs что получили","Как делала презентацию данных для топ-менеджмента","Кейс: автоматический ежедневный отчёт на email","Реструктуризация модели данных: до и после","Один дашборд заменил еженедельное совещание","Power BI Embedded: первый опыт и выводы","Кейс: аналитика оттока клиентов с нуля","Итог полугода: 5 кейсов которые изменили подход","Как я строила отчётность в стартапе без бюджета","Кейс: автоматизация HR-аналитики"],
-tip:["SELECTEDVALUE vs VALUES: когда что использовать","Как сделать динамический заголовок в Power BI","3 функции Power Query M которые использую каждый день","Переменные VAR в DAX: почему это меняет всё","Как правильно построить таблицу дат","Tooltip-страницы: недооценённый инструмент Power BI","Как избежать circular dependency в DAX","DIVIDE вместо деления: зачем и когда","Как настроить инкрементальное обновление","Row-level security пошагово","Conditional formatting в таблицах: 3 приёма","Как дебажить DAX через DAX Studio","Разница Import vs DirectQuery на практике","Как сделать drill-through правильно","Оптимизация модели: убираем лишнее","Как читать план выполнения SQL-запроса","ClickHouse: зачем аналитику знать этот инструмент","Bookmarks в Power BI: навигация без разработчика","What-if параметры: как объяснить бизнесу сценарии","Как тестировать дашборд перед сдачей","Power Automate + Power BI: простая интеграция","Агрегации в Power BI: когда нужны","Как использовать группировку и binning","CALCULATE: самая важная функция DAX","Как я провожу ревью чужого дашборда","Подготовка к PL-300: что реально помогло","Как объяснить ценность аналитики нетехнику","Топ-3 расширения VSCode для работы с данными","Как настроить алерты в Power BI Service","Параметры подключения: что важно знать","Как сделать мобильный макет в Power BI","RANKX: как работает и где применять","Иерархии в модели данных: правила построения","Как использовать Python в Power Query","Decomposition tree: когда это реально полезно","Key influencers: честный разбор инструмента","Как настроить Row-level security через роли","Как писать M-функции с параметрами","Финальный совет: как поддерживать дашборды живыми"],
-truth:["80% дашбордов — красивая мусорка","Почему «сделайте красиво» — это не ТЗ","SQL не спасёт если хаос в процессах","Автоматизация не работает без понимания процесса","RLS без IT — почему почти никто не делает","Дашборд с 20 графиками который не отвечает ни на что","Технический долг в BI: как накапливается незаметно","Почему первая версия дашборда всегда неправильная","Главная ложь: «у нас есть данные»","Красивый отчёт ≠ полезный отчёт","Почему аналитик — это не «человек с Excel»","Что происходит когда данные расходятся","Почему «просто дашборд» — никогда не просто","Почему бизнес не использует дашборды которые заказывает","Проблема не в инструменте а в постановке задачи","Почему KPI без контекста — это ничто","Аналитика без доверия к данным: что делать","Почему автоматизация ломается через 3 месяца","Данные есть — инсайтов нет. В чём проблема","Почему отчёт который «всё устраивает» ничего не меняет","Правда о работе аналитика которую не пишут в вакансиях","Почему я перестала делать отчёты «для галочки»","Дашборд как декор: когда визуализация мешает","Self-service BI: почему не работает само по себе","Почему данные врут — и это не баг","Итог полугода: в чём я была не права"],
-process:["Бот → задача → статус → уведомление: моя система","Как выглядит нормальная воронка задач","CRM без логики = дорогая таблица","5 ошибок при внедрении автоматизации","Как я документирую процессы","Как строить ТЗ для дашборда","Мой процесс онбординга нового отчёта","Как провести discovery перед проектом","Структура папок и файлов в BI-проекте","Как собирать требования с нетехнических стейкхолдеров","Ревью DAX-мер: мой подход","Как я планирую спринт аналитика","Процесс согласования дашборда с заказчиком","Как я веду документацию модели данных","Шаблон ТЗ для BI-проекта","Как организовать хранение отчётов в компании","Процесс деплоя отчёта в Power BI Service","Как провести демо дашборда для бизнеса","Как отслеживать качество данных в пайплайне","Процесс handover отчёта другому аналитику","Как я описываю метрики в глоссарии","Мой шаблон постмортема аналитического проекта","Как построить data governance в малой команде","Процесс обновления и поддержки старых отчётов","Как я оцениваю трудозатраты на BI-задачи","Итог полугода: что изменила в процессах"],
-personal:["Из логистики в аналитику: что реально помогло","Как я учусь Python работая full-time","Почему иду в PL-300 и что это даёт","Мой стек: что использую и зачем","4 года в аналитике: что изменилось","Что читаю и смотрю про данные сейчас","Как организую рабочее пространство","Что значит быть self-taught аналитиком","Ошибка которая стоила неделю работы","Честно о том что не нравится в профессии","Как я готовилась к сертификации PL-300","3 месяца LinkedIn: цифры и выводы","Почему аналитик должен уметь продавать идеи","Как я справляюсь с синдромом самозванца","Что дал переход в страховую компанию","Книги которые изменили подход к данным","Как нахожу баланс между глубиной и скоростью","Почему начала вести LinkedIn и что вышло","Мой путь в немецкий язык: зачем и как","Что я узнала о себе за год в аналитике","Как принимаю карьерные решения","Почему портфолио важнее резюме","Что изменилось после PL-300","Мои цели на следующие 6 месяцев","Что советую тем кто входит в аналитику","Итог полугода: личный взгляд назад и вперёд"]
+  case:['Как я сократила время закрытия отчёта в 16 раз','Power BI для нетехнической команды: с чего начать','ETL без программиста: мой подход в Power Query','Как я выстроила единый источник правды для 3 отделов','Автоматизация согласований через Bitrix и Telegram','Дашборд по продажам: от хаоса к системе за 2 недели','Как я внедрила RLS без участия IT-отдела','Отчётность в страховой компании: специфика и нюансы','Кейс: воронка продаж в BI — как это выглядит изнутри','Как я автоматизировала сбор данных из 6 источников','Power BI Service: настройка шлюза без боли','Кейс: Telegram-бот для команды из 50 человек','Как я перестроила отчётность под новую оргструктуру','Дашборд, которым пользуются каждый день','Кейс: внедрила систему KPI с нуля за 3 месяца','Данные из CRM как основа для принятия решений','Аналитика для маркетинга: что попросили vs что получили','Как делала презентацию данных для топ-менеджмента','Кейс: автоматический ежедневный отчёт на email','Реструктуризация модели данных: до и после','Один дашборд заменил еженедельное совещание','Power BI Embedded: первый опыт и выводы','Кейс: аналитика оттока клиентов с нуля','Итог полугода: 5 кейсов которые изменили подход','Как я строила отчётность в стартапе без бюджета','Кейс: автоматизация HR-аналитики'],
+  tip:['SELECTEDVALUE vs VALUES: когда что использовать','Как сделать динамический заголовок в Power BI','3 функции Power Query M которые использую каждый день','Переменные VAR в DAX: почему это меняет всё','Как правильно построить таблицу дат','Tooltip-страницы: недооценённый инструмент Power BI','Как избежать circular dependency в DAX','DIVIDE вместо деления: зачем и когда','Как настроить инкрементальное обновление','Row-level security пошагово','Conditional formatting в таблицах: 3 приёма','Как дебажить DAX через DAX Studio','Разница Import vs DirectQuery на практике','Как сделать drill-through правильно','Оптимизация модели: убираем лишнее','Как читать план выполнения SQL-запроса','ClickHouse: зачем аналитику знать этот инструмент','Bookmarks в Power BI: навигация без разработчика','What-if параметры: как объяснить бизнесу сценарии','Как тестировать дашборд перед сдачей','Power Automate + Power BI: простая интеграция','Агрегации в Power BI: когда нужны','Как использовать группировку и binning','CALCULATE: самая важная функция DAX','Как я провожу ревью чужого дашборда','Подготовка к PL-300: что реально помогло','Как объяснить ценность аналитики нетехнику','Топ-3 расширения VSCode для работы с данными','Как настроить алерты в Power BI Service','Как сделать мобильный макет в Power BI','RANKX: как работает и где применять','Иерархии в модели данных: правила построения','Как использовать Python в Power Query','Decomposition tree: когда это реально полезно','Key influencers: честный разбор инструмента','Как настроить Row-level security через роли','Как писать M-функции с параметрами','Финальный совет: как поддерживать дашборды живыми','Что проверить перед публикацией отчёта'],
+  truth:['80% дашбордов — красивая мусорка','Почему «сделайте красиво» — это не ТЗ','SQL не спасёт если хаос в процессах','Автоматизация не работает без понимания процесса','RLS без IT — почему почти никто не делает','Дашборд с 20 графиками который не отвечает ни на что','Технический долг в BI: как накапливается незаметно','Почему первая версия дашборда всегда неправильная','Главная ложь: «у нас есть данные»','Красивый отчёт ≠ полезный отчёт','Почему аналитик — это не «человек с Excel»','Что происходит когда данные расходятся','Почему «просто дашборд» — никогда не просто','Почему бизнес не использует дашборды которые заказывает','Проблема не в инструменте а в постановке задачи','Почему KPI без контекста — это ничто','Аналитика без доверия к данным: что делать','Почему автоматизация ломается через 3 месяца','Данные есть — инсайтов нет. В чём проблема','Почему отчёт который «всё устраивает» ничего не меняет','Правда о работе аналитика которую не пишут в вакансиях','Почему я перестала делать отчёты «для галочки»','Дашборд как декор: когда визуализация мешает','Self-service BI: почему не работает само по себе','Почему данные врут — и это не баг','Итог полугода: в чём я была не права'],
+  process:['Бот → задача → статус → уведомление: моя система','Как выглядит нормальная воронка задач','CRM без логики = дорогая таблица','5 ошибок при внедрении автоматизации','Как я документирую процессы','Как строить ТЗ для дашборда','Мой процесс онбординга нового отчёта','Как провести discovery перед проектом','Структура папок и файлов в BI-проекте','Как собирать требования с нетехнических стейкхолдеров','Ревью DAX-мер: мой подход','Как я планирую спринт аналитика','Процесс согласования дашборда с заказчиком','Как я веду документацию модели данных','Шаблон ТЗ для BI-проекта','Как организовать хранение отчётов в компании','Процесс деплоя отчёта в Power BI Service','Как провести демо дашборда для бизнеса','Как отслеживать качество данных в пайплайне','Процесс handover отчёта другому аналитику','Как я описываю метрики в глоссарии','Мой шаблон постмортема аналитического проекта','Как построить data governance в малой команде','Процесс обновления и поддержки старых отчётов','Как я оцениваю трудозатраты на BI-задачи','Итог полугода: что изменила в процессах'],
+  personal:['Из логистики в аналитику: что реально помогло','Как я учусь Python работая full-time','Почему иду в PL-300 и что это даёт','Мой стек: что использую и зачем','4 года в аналитике: что изменилось','Что читаю и смотрю про данные сейчас','Как организую рабочее пространство','Что значит быть self-taught аналитиком','Ошибка которая стоила неделю работы','Честно о том что не нравится в профессии','Как я готовилась к сертификации PL-300','3 месяца LinkedIn: цифры и выводы','Почему аналитик должен уметь продавать идеи','Как я справляюсь с синдромом самозванца','Что дал переход в страховую компанию','Книги которые изменили подход к данным','Как нахожу баланс между глубиной и скоростью','Почему начала вести LinkedIn и что вышло','Мой путь в немецкий язык: зачем и как','Что я узнала о себе за год в аналитике','Как принимаю карьерные решения','Почему портфолио важнее резюме','Что изменилось после PL-300','Мои цели на следующие 6 месяцев','Что советую тем кто входит в аналитику','Итог полугода: личный взгляд назад и вперёд']
 };
 
 function genDefaultPosts(){
   const idx={case:0,tip:0,truth:0,process:0,personal:0};
-  const result=[];
-  const START=new Date(2026,3,27);
+  const result=[];const START=new Date(2026,3,27);
+  const CATS_BY_DAY=['case','tip','truth','tip','process','tip','personal'];
   for(let w=0;w<26;w++){
     for(let d=0;d<7;d++){
       const cat=CATS_BY_DAY[d];
       const title=T[cat][idx[cat]%T[cat].length];
-      const date=new Date(START); date.setDate(START.getDate()+w*7+d);
-      const m=date.getMonth()+1;
-      result.push({post_key:`post_${w}_${d}`,week:w,day_index:d,cat,title,post_date:date.toISOString().split('T')[0],is_custom:false,sort_order:w*7+d,m,done:false,post_text:''});
+      const date=new Date(START);date.setDate(START.getDate()+w*7+d);
+      result.push({post_key:`post_${w}_${d}`,week:w,day_index:d,cat,title,goal:'trust',format:'case',status:'idea',post_date:date.toISOString().split('T')[0],is_custom:false,sort_order:w*7+d,hook_score:0,impressions:0,reactions:0,comments:0,reposts:0,saves:0,profile_views:0,new_followers:0,dm_count:0,notes:'',post_text:'',is_deleted:false});
       idx[cat]++;
     }
   }
   return result;
 }
 
-// ─── AUTH ──────────────────────────────────────────────────
+function hydrate(data){
+  return data.map((r,i)=>{
+    const hasDate=r.post_date&&r.post_date!=='';
+    const d=hasDate?new Date(r.post_date+'T00:00:00'):null;
+    return{...r,_idx:i,id_db:r.id,date:d,m:d?d.getMonth()+1:null,
+      status:r.status||'idea',goal:r.goal||'trust',format:r.format||'case',
+      hook_score:+(r.hook_score||0),impressions:+(r.impressions||0),reactions:+(r.reactions||0),
+      comments:+(r.comments||0),reposts:+(r.reposts||0),saves:+(r.saves||0),
+      profile_views:+(r.profile_views||0),new_followers:+(r.new_followers||0),dm_count:+(r.dm_count||0),
+      notes:r.notes||'',post_text:r.post_text||'',is_deleted:r.is_deleted||false};
+  });
+}
+
+// AUTH
 async function authSubmit(){
   const email=document.getElementById('auth-email').value.trim();
   const password=document.getElementById('auth-password').value;
@@ -436,129 +429,65 @@ async function authSubmit(){
   try{
     const res=await sb.auth.signInWithPassword({email,password});
     if(res.error)throw res.error;
-    currentUser=res.data.user||res.data.session?.user;
+    currentUser=res.data.user;
     await loadAndInit();
-  }catch(e){showMsg(e.message||'Неверный email или пароль','error');}
+  }catch(e){showMsg(e.message||'Ошибка входа','error');}
   btn.disabled=false;btn.textContent='Войти';
 }
-
-function showMsg(text,type){
-  const el=document.getElementById('auth-msg');
-  el.textContent=text;el.className='auth-msg '+type;
-}
-
-async function signOut(){
-  await sb.auth.signOut();
-  currentUser=null;posts=[];
-  document.getElementById('app-screen').style.display='none';
-  document.getElementById('auth-screen').style.display='flex';
-}
-
+function showMsg(text,type){const el=document.getElementById('auth-msg');el.textContent=text;el.className='auth-msg '+type;}
+async function signOut(){await sb.auth.signOut();currentUser=null;posts=[];document.getElementById('app-screen').style.display='none';document.getElementById('auth-screen').style.display='flex';}
 sb.auth.getSession().then(({data:{session}})=>{if(session){currentUser=session.user;loadAndInit();}});
-sb.auth.onAuthStateChange((_,session)=>{if(session&&!currentUser){currentUser=session.user;loadAndInit();}});
 
-// ─── LOAD & INIT ───────────────────────────────────────────
+// LOAD
 async function loadAndInit(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('loading-screen').style.display='flex';
   document.getElementById('user-email').textContent=currentUser.email;
-
   try{
-    setLoading('загрузка постов из базы...');
-    const {data,error}=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
+    setLoading('загрузка из базы...');
+    let{data,error}=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
     if(error)throw error;
-
-    if(!data||data.length===0){
-      setLoading('первый запуск — загружаем 182 поста...');
-      const defaults=genDefaultPosts();
-      const toInsert=defaults.map(p=>{
-        const{m,done,post_text,...dbFields}=p;
-        return{...dbFields,user_id:currentUser.id};
-      });
-      for(let i=0;i<toInsert.length;i+=50){
-        const {error:ie}=await sb.from('posts').insert(toInsert.slice(i,i+50));
-        if(ie)throw ie;
-      }
-      const {data:fresh}=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
-      posts=hydratePosts(fresh||[]);
-    } else {
-      posts=hydratePosts(data);
+    if(!data||!data.length){
+      setLoading('первый запуск — загружаем посты...');
+      const defaults=genDefaultPosts().map(p=>({...p,user_id:currentUser.id}));
+      for(let i=0;i<defaults.length;i+=50){const{error:ie}=await sb.from('posts').insert(defaults.slice(i,i+50));if(ie)throw ie;}
+      const fresh=await sb.from('posts').select('*').eq('user_id',currentUser.id).order('sort_order');
+      data=fresh.data||[];
     }
-
-    setSyncStatus('всё сохранено','saved');
+    posts=hydrate(data);
+    setSyncStatus('сохранено','saved');
     document.getElementById('loading-screen').style.display='none';
     document.getElementById('app-screen').style.display='block';
-    buildMonthPills();
-    renderList();renderCal();renderEdit();
-    setTimeout(()=>{
-      const tp=posts.find(p=>p.date.toDateString()===new Date().toDateString());
-      if(tp){selectPost(tp.id,'list');setTimeout(()=>{const el=document.querySelector('.post-row.today-hl');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},80);}
-    },100);
-  }catch(e){
-    setLoading('ошибка: '+e.message);
-  }
+    buildMonthPills();renderList();renderBank();renderCal();renderEdit();renderLab();
+    renderEditor('list');renderEditor('bank');renderEditor('cal');
+    setTimeout(()=>{const tp=posts.find(p=>p.date&&p.date.toDateString()===new Date().toDateString());if(tp){selectPost(tp.id_db,'list');setTimeout(()=>{const el=document.querySelector('.post-row.today-hl');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},80);}},100);
+  }catch(e){setLoading('ошибка: '+e.message);console.error(e);}
 }
+function setLoading(t){document.getElementById('loading-text').textContent=t;}
+function setSyncStatus(t,c){const el=document.getElementById('sync-status');el.textContent=t;el.className='sync-status '+c;}
 
-function hydratePosts(data){
-  return data.map((row,i)=>{
-    const d=new Date(row.post_date+'T00:00:00');
-    return{...row,id:i,id_db:row.id,date:d,m:d.getMonth()+1,
-      done:row.done||false,post_text:row.post_text||'',is_deleted:row.is_deleted||false};
-  });
-}
-
-function setLoading(text){document.getElementById('loading-text').textContent=text;}
-function setSyncStatus(text,cls){const el=document.getElementById('sync-status');el.textContent=text;el.className='sync-status '+cls;}
-
-function buildMonthPills(){
-  const months=[...new Set(posts.map(p=>p.m))].sort((a,b)=>a-b);
-  const container=document.getElementById('month-pills');
-  container.innerHTML=months.map(m=>`<span class="pill" data-g="m" data-v="${m}" onclick="setFilter(this)">${MN_SHORT[m]}</span>`).join('');
-}
-
-// ─── SAVE ─────────────────────────────────────────────────
+// SAVE
 async function savePostToDB(p){
   if(!currentUser||!p.id_db)return;
   setSyncStatus('сохранение...','saving');
-  const{error}=await sb.from('posts')
-    .update({done:p.done,post_text:p.post_text||'',updated_at:new Date().toISOString()})
-    .eq('id',p.id_db);
-  if(error){setSyncStatus('ошибка: '+error.message,'error');console.error('savePostToDB',error);return;}
+  const payload={status:p.status,goal:p.goal,format:p.format,post_text:p.post_text||'',
+    hook_score:p.hook_score||0,impressions:p.impressions||0,reactions:p.reactions||0,
+    comments:p.comments||0,reposts:p.reposts||0,saves:p.saves||0,
+    profile_views:p.profile_views||0,new_followers:p.new_followers||0,dm_count:p.dm_count||0,
+    notes:p.notes||'',done:['published','reviewed'].includes(p.status),
+    is_deleted:p.is_deleted||false,post_date:p.post_date||null,
+    updated_at:new Date().toISOString()};
+  const{error}=await sb.from('posts').update(payload).eq('id',p.id_db);
+  if(error){setSyncStatus('ошибка','error');console.error(error);return;}
   setSyncStatus('сохранено','saved');
 }
+function debounceSave(p){clearTimeout(saveTimer);saveTimer=setTimeout(()=>savePostToDB(p),700);}
 
-function saveText(ctx){
-  if(!selectedPost){setSyncStatus('сначала выбери пост','error');return;}
-  selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;
-  savePostToDB(selectedPost);
+// FILTERS & TABS
+function buildMonthPills(){
+  const months=[...new Set(posts.filter(p=>p.m).map(p=>p.m))].sort((a,b)=>a-b);
+  document.getElementById('month-pills').innerHTML=months.map(m=>`<span class="pill" data-g="m" data-v="${m}" onclick="setFilter(this)">${MN_SHORT[m]}</span>`).join('');
 }
-
-async function updatePostField(p,fields){
-  if(!currentUser||!p.id_db)return;
-  setSyncStatus('сохранение...','saving');
-  const{error}=await sb.from('posts').update({...fields,updated_at:new Date().toISOString()}).eq('id',p.id_db);
-  if(error){setSyncStatus('ошибка','error');return;}
-  setSyncStatus('всё сохранено','saved');
-}
-
-async function deletePostFromDB(p){
-  if(!currentUser||!p.id_db)return;
-  await sb.from('posts').delete().eq('id',p.id_db);
-}
-
-async function insertPostToDB(postData){
-  const{m,done,post_text,date,id,...dbFields}=postData;
-  const{data,error}=await sb.from('posts').insert({...dbFields,user_id:currentUser.id}).select().single();
-  if(error)throw error;
-  return data;
-}
-
-function debounceSave(p){
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>savePostToDB(p),800);
-}
-
-// ─── FILTERS ──────────────────────────────────────────────
 function setFilter(el){
   const g=el.dataset.g,v=el.dataset.v;
   document.querySelectorAll(`[data-g="${g}"]`).forEach(x=>x.classList.remove('on'));
@@ -567,68 +496,65 @@ function setFilter(el){
   else if(g==='c')filters.c=v;
   else if(g==='s')filters.s=v;
   else if(g==='cc')filters.cc=v;
-  else if(g==='cs')filters.cs=v;
-  if(g==='m'||g==='c'||g==='s')renderList();else renderCal();
+  if(['m','c','s'].includes(g))renderList();else renderCal();
 }
-
 function switchTab(t){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['list','calendar','edit'][i]===t));
-  ['list','calendar','edit'].forEach(id=>document.getElementById(`tab-${id}`).style.display=id===t?'':'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['list','bank','calendar','lab','edit'][i]===t));
+  ['list','bank','calendar','lab','edit'].forEach(id=>document.getElementById(`tab-${id}`).style.display=id===t?'':'none');
   if(t==='calendar')renderCal();
   if(t==='edit')renderEdit();
+  if(t==='lab')renderLab();
+  if(t==='bank')renderBank();
 }
 
-// ─── LIST ─────────────────────────────────────────────────
+// LIST
+function scheduledPosts(){return posts.filter(p=>!p.is_deleted&&p.post_date&&p.date);}
+function bankPosts(){return posts.filter(p=>!p.is_deleted&&(!p.post_date||!p.date));}
 function filteredPosts(){
-  return posts.filter(p=>{
-    if(p.is_deleted)return false;
+  return scheduledPosts().filter(p=>{
     if(filters.m&&p.m!==filters.m)return false;
     if(filters.c!=='all'&&p.cat!==filters.c)return false;
-    if(filters.s==='done'&&!p.done)return false;
-    if(filters.s==='todo'&&p.done)return false;
+    if(filters.s!=='all'&&p.status!==filters.s)return false;
     return true;
   });
 }
-
-function computeWLocal(postsArr){
-  let cm=-1,wm=0,lw=-1;
-  postsArr.forEach(p=>{
-    if(p.m!==cm){cm=p.m;wm=0;lw=-1;}
-    if(p.week!==lw){wm++;lw=p.week;}
-    p.wLocal=wm;
-  });
-}
+function computeWLocal(arr){let cm=-1,wm=0,lw=-1;arr.forEach(p=>{if(p.m!==cm){cm=p.m;wm=0;lw=-1;}if(p.week!==lw){wm++;lw=p.week;}p.wLocal=wm;});}
 
 function renderList(){
-  computeWLocal(posts);
+  computeWLocal(scheduledPosts());
   const f=filteredPosts();
-  document.getElementById('st-done').textContent=posts.filter(p=>p.done).length;
-  document.getElementById('st-left').textContent=posts.filter(p=>!p.done).length;
+  const sched=scheduledPosts();
+  document.getElementById('st-total').textContent=sched.length;
+  document.getElementById('st-published').textContent=sched.filter(p=>['published','reviewed'].includes(p.status)).length;
+  document.getElementById('st-ready').textContent=sched.filter(p=>p.status==='ready').length;
+  document.getElementById('st-left').textContent=sched.filter(p=>!['published','reviewed'].includes(p.status)).length;
   document.getElementById('st-vis').textContent=f.length;
-  document.getElementById('st-total').textContent=posts.length;
   const bm={};
   f.forEach(p=>{if(!bm[p.m])bm[p.m]={};if(!bm[p.m][p.wLocal])bm[p.m][p.wLocal]=[];bm[p.m][p.wLocal].push(p);});
   let h='';
-  if(!f.length){h='<div class="no-results">Нет постов по фильтрам</div>';}
+  if(!f.length)h='<div class="no-results">Нет постов по фильтрам</div>';
   else{
     const ts=new Date().toDateString();
     Object.keys(bm).sort((a,b)=>a-b).forEach(m=>{
-      h+=`<div><div class="month-head">${MN[parseInt(m)]||m}</div>`;
+      h+=`<div><div class="month-head">${MN[parseInt(m)]}</div>`;
       Object.keys(bm[m]).sort((a,b)=>a-b).forEach(w=>{
-        const twk=bm[m][w].some(p=>p.date.toDateString()===ts);
+        const twk=bm[m][w].some(p=>p.date&&p.date.toDateString()===ts);
         h+=`<div class="week-head${twk?' today-hl':''}">Неделя ${w}</div>`;
         bm[m][w].forEach(p=>{
-          const sel=selectedPost&&selectedPost.id===p.id&&selectedCtx==='list';
-          const ist=p.date.toDateString()===ts;
-          h+=`<div class="post-row${p.done?' done':''}${sel?' selected':''}${ist?' today-hl':''}" onclick="selectPost(${p.id},'list')">
-            <div class="cb" onclick="event.stopPropagation();toggleDone(${p.id})">
+          const sel=selectedPost&&selectedPost.id_db===p.id_db&&selectedCtx==='list';
+          const done=['published','reviewed'].includes(p.status);
+          const ist=p.date&&p.date.toDateString()===ts;
+          h+=`<div class="post-row${done?' done':''}${sel?' selected':''}${ist?' today-hl':''}" onclick="selectPost('${p.id_db}','list')">
+            <div class="cb" onclick="event.stopPropagation();quickStatus('${p.id_db}')">
               <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <span class="day-tag">${DAYS[p.day_index]}</span>
             <span class="cat-dot ${DOT_CLS[p.cat]}"></span>
             <span class="post-title">${p.title}${p.is_custom?'<span class="custom-badge">своя</span>':''}</span>
             <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
-            <button class="edit-del" onclick="event.stopPropagation();deletePost(${p.id})" title="Скрыть">×</button>
+            <span class="goal-badge">${GOALS[p.goal]||''}</span>
+            <span class="status-badge ${STATUS_CLS[p.status]||''}">${STATUSES[p.status]||'Идея'}</span>
+            <button class="edit-del" onclick="event.stopPropagation();deletePost('${p.id_db}')" title="Скрыть">×</button>
           </div>`;
         });
       });
@@ -636,55 +562,185 @@ function renderList(){
     });
   }
   document.getElementById('list-container').innerHTML=h;
+  renderEditor('list');
 }
 
-// ─── EDITOR ───────────────────────────────────────────────
-function selectPost(id,ctx){
-  if(selectedPost){
-    const ta=document.getElementById(`textarea-${selectedCtx}`);
-    if(ta){selectedPost.post_text=ta.value;debounceSave(selectedPost);}
+// BANK
+function renderBank(){
+  const bank=bankPosts();
+  let h='';
+  if(!bank.length)h='<div class="no-results">Банк пуст — добавь идеи без даты</div>';
+  else{
+    h+=`<div class="bank-toolbar"><span class="bank-toolbar-left">${bank.length} идей без даты</span></div>`;
+    bank.forEach(p=>{
+      const sel=selectedPost&&selectedPost.id_db===p.id_db&&selectedCtx==='bank';
+      h+=`<div class="bank-row${sel?' selected':''}" onclick="selectPost('${p.id_db}','bank')">
+        <span class="cat-dot ${DOT_CLS[p.cat]}"></span>
+        <span class="post-title" style="margin-left:6px">${p.title}${p.is_custom?'<span class="custom-badge">своя</span>':''}</span>
+        <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
+        <span class="goal-badge">${GOALS[p.goal]||''}</span>
+        <button class="edit-del" onclick="event.stopPropagation();deletePost('${p.id_db}')" title="Скрыть">×</button>
+      </div>`;
+    });
   }
-  selectedPost=posts[id];selectedCtx=ctx;
-  const ta=document.getElementById(`textarea-${ctx}`);
-  ta.value=selectedPost.post_text||'';updateWC(ctx);
-  document.getElementById(`editor-topic-${ctx}`).textContent=selectedPost.title;
-  document.getElementById(`editor-topic-${ctx}`).style.cssText='';
-  const d=selectedPost.date;
-  const ds=`${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
-  document.getElementById(`editor-meta-${ctx}`).innerHTML=`<span class="cat-badge ${CAT_CLS[selectedPost.cat]}">${CAT_NAME[selectedPost.cat]}</span><span style="font-size:11px;color:var(--text3)">${DAYS[selectedPost.day_index]}, ${ds}</span>`;
-  if(ctx==='list')renderList();else renderCal();
+  document.getElementById('bank-container').innerHTML=h;
+  renderEditor('bank');
 }
 
-function toggleDone(id){
-  const p=posts[id];p.done=!p.done;
-  savePostToDB(p);renderList();
-  if(document.getElementById('tab-calendar').style.display!=='none')renderCal();
+// EDITOR
+function renderEditor(ctx){
+  const root=document.getElementById(`editor-${ctx}`);
+  if(!root)return;
+  const p=selectedPost&&selectedCtx===ctx?selectedPost:null;
+  if(!p){
+    root.innerHTML=`<div style="padding:24px 20px;color:var(--text3);font-size:12px;font-style:italic;">${ctx==='bank'?'Выбери идею из банка':'Выбери пост из списка'}</div>`;
+    return;
+  }
+  const isBank=!p.post_date||!p.date;
+  root.innerHTML=`
+    <div class="editor-header">
+      <div class="editor-topic">${p.title}</div>
+      <div class="editor-meta">
+        <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
+        <span class="status-badge ${STATUS_CLS[p.status]||''}">${STATUSES[p.status]||'Идея'}</span>
+        ${p.date?`<span style="font-size:11px;color:var(--text3)">${DAYS[p.day_index]}, ${p.date.toLocaleDateString('ru-RU')}</span>`:'<span style="font-size:11px;color:var(--tip)">без даты</span>'}
+      </div>
+    </div>
+    <div class="editor-body">
+      <div class="editor-grid">
+        <div class="form-row"><label class="form-label">Цель</label>
+          <select class="form-select small-input" id="goal-${ctx}" onchange="updateField('${ctx}','goal',this.value)">
+            ${Object.entries(GOALS).map(([k,v])=>`<option value="${k}"${k===p.goal?' selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-row"><label class="form-label">Статус</label>
+          <select class="form-select small-input" id="status-${ctx}" onchange="updateField('${ctx}','status',this.value)">
+            ${Object.entries(STATUSES).map(([k,v])=>`<option value="${k}"${k===p.status?' selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        ${isBank?`<div class="form-row" style="grid-column:1/-1"><label class="form-label">Назначить дату → перейдёт в план</label>
+          <input class="form-input small-input" type="date" id="assign-date-${ctx}" onchange="assignDate('${ctx}',this.value)"></div>`:''}
+      </div>
+      <div class="hint-box">Зацеп → контекст → действие → результат → вывод → CTA.<br>Оценка хука 0–5: цифра / конфликт / боль в первой строке.</div>
+      <label class="editor-label">Текст публикации</label>
+      <textarea id="textarea-${ctx}" style="height:200px" placeholder="Напиши текст поста...">${p.post_text||''}</textarea>
+      <div id="hook-line-${ctx}" class="hook-line"></div>
+      <div style="margin-top:14px;margin-bottom:8px;">
+        <label class="editor-label">Метрики после публикации</label>
+        <div class="metrics-grid">
+          ${metricField('impressions','Показы',p,ctx)}
+          ${metricField('reactions','Реакции',p,ctx)}
+          ${metricField('comments','Комментарии',p,ctx)}
+          ${metricField('profile_views','Переходы →профиль',p,ctx)}
+          ${metricField('dm_count','Диалоги',p,ctx)}
+          ${metricField('new_followers','Новые контакты',p,ctx)}
+          ${metricField('reposts','Репосты',p,ctx)}
+          ${metricField('saves','Сохранения',p,ctx)}
+        </div>
+      </div>
+      <label class="editor-label">Вывод / что сработало</label>
+      <textarea id="notes-${ctx}" style="height:70px" placeholder="Что поменять в следующих постах...">${p.notes||''}</textarea>
+    </div>
+    <div class="editor-footer">
+      <span class="word-count" id="wc-${ctx}">0 слов</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn" onclick="clearEditor('${ctx}')">Очистить</button>
+        <button class="btn" onclick="saveText('${ctx}')">Сохранить</button>
+        <button class="btn btn-primary" onclick="setStatus('${ctx}','published')">Опубликовано ✓</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 14px;"><button class="add-idea-btn" onclick="openModal('${ctx}')">+ добавить свою идею</button></div>
+  `;
+  updateWC(ctx);
+  checkHook(ctx);
+  document.getElementById(`textarea-${ctx}`).addEventListener('input',()=>{
+    if(selectedPost){selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;updateWC(ctx);checkHook(ctx);debounceSave(selectedPost);}
+  });
+  document.getElementById(`notes-${ctx}`).addEventListener('input',()=>{
+    if(selectedPost){selectedPost.notes=document.getElementById(`notes-${ctx}`).value;debounceSave(selectedPost);}
+  });
+  ['impressions','reactions','comments','profile_views','dm_count','new_followers','reposts','saves'].forEach(f=>{
+    const el=document.getElementById(`${f}-${ctx}`);
+    if(el)el.addEventListener('input',()=>{if(selectedPost){selectedPost[f]=+(el.value||0);debounceSave(selectedPost);renderLab();}});
+  });
+}
+
+function metricField(field,label,p,ctx){
+  return`<div class="metric-field"><span class="metric-label">${label}</span><input class="metric-input" id="${field}-${ctx}" type="number" min="0" value="${p[field]||0}"></div>`;
+}
+
+function checkHook(ctx){
+  const ta=document.getElementById(`textarea-${ctx}`);
+  const box=document.getElementById(`hook-line-${ctx}`);
+  if(!ta||!box)return;
+  const first=(ta.value.split('\n').find(x=>x.trim())||'').trim();
+  const ok=first.length>15&&(/[0-9%]/.test(first)||/[?!]/.test(first)||/не |Почему|Как /i.test(first));
+  box.innerHTML=first?`<span class="hook-dot ${ok?'ok':'bad'}"></span><span>${ok?'Хук рабочий':'Хук слабый — добавь цифру, вопрос или конфликт'}</span>`:'';
+}
+
+function updateWC(ctx){
+  const ta=document.getElementById(`textarea-${ctx}`);
+  const w=ta&&ta.value.trim()?ta.value.trim().split(/\s+/).length:0;
+  const el=document.getElementById(`wc-${ctx}`);if(el)el.textContent=`${w} слов`;
+}
+
+function updateField(ctx,field,val){
+  if(!selectedPost)return;
+  selectedPost[field]=val;
+  debounceSave(selectedPost);
+  renderList();renderBank();renderLab();
+}
+
+function assignDate(ctx,val){
+  if(!selectedPost||!val)return;
+  const date=new Date(val+'T00:00:00');
+  selectedPost.post_date=val;
+  selectedPost.date=date;
+  selectedPost.m=date.getMonth()+1;
+  selectedPost.day_index=date.getDay()===0?6:date.getDay()-1;
+  savePostToDB(selectedPost);
+  buildMonthPills();renderList();renderBank();renderCal();
+}
+
+function selectPost(id_db,ctx){
+  if(selectedPost)debounceSave(selectedPost);
+  selectedPost=posts.find(p=>p.id_db===id_db);
+  selectedCtx=ctx;
+  renderEditor(ctx);
+  if(ctx==='list')renderList();
+  else if(ctx==='bank')renderBank();
+  else renderCal();
+}
+
+function quickStatus(id_db){
+  const p=posts.find(x=>x.id_db===id_db);if(!p)return;
+  p.status=['published','reviewed'].includes(p.status)?'idea':'published';
+  savePostToDB(p);renderList();renderLab();
+}
+
+function saveText(ctx){
+  if(!selectedPost)return;
+  selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;
+  selectedPost.notes=document.getElementById(`notes-${ctx}`)?.value||selectedPost.notes;
+  savePostToDB(selectedPost);
 }
 
 function clearEditor(ctx){
   if(!selectedPost)return;
   selectedPost.post_text='';
-  document.getElementById(`textarea-${ctx}`).value='';updateWC(ctx);
-  debounceSave(selectedPost);
+  const ta=document.getElementById(`textarea-${ctx}`);if(ta)ta.value='';
+  updateWC(ctx);debounceSave(selectedPost);
 }
 
-function markDone(ctx){
+function setStatus(ctx,status){
   if(!selectedPost)return;
-  selectedPost.post_text=document.getElementById(`textarea-${ctx}`).value;
-  selectedPost.done=true;savePostToDB(selectedPost);renderList();
-  if(document.getElementById('tab-calendar').style.display!=='none')renderCal();
+  selectedPost.status=status;
+  selectedPost.post_text=document.getElementById(`textarea-${ctx}`)?.value||selectedPost.post_text;
+  savePostToDB(selectedPost);
+  renderList();renderBank();renderCal();renderLab();renderEditor(ctx);
 }
 
-function updateWC(ctx){
-  const ta=document.getElementById(`textarea-${ctx}`);
-  const w=ta.value.trim()?ta.value.trim().split(/\s+/).length:0;
-  document.getElementById(`wc-${ctx}`).textContent=`${w} слов`;
-}
-
-document.getElementById('textarea-list').addEventListener('input',()=>{updateWC('list');if(selectedPost){selectedPost.post_text=document.getElementById('textarea-list').value;debounceSave(selectedPost);}});
-document.getElementById('textarea-cal').addEventListener('input',()=>{updateWC('cal');if(selectedPost){selectedPost.post_text=document.getElementById('textarea-cal').value;debounceSave(selectedPost);}});
-
-// ─── CALENDAR ─────────────────────────────────────────────
+// CALENDAR
 function renderCal(){
   document.getElementById('cal-title').textContent=`${MONTH_NAMES_RU[calMonth]} ${calYear}`;
   document.getElementById('cal-headers').innerHTML=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div class="cal-day-header">${d}</div>`).join('');
@@ -696,100 +752,159 @@ function renderCal(){
   for(let i=0;i<sd;i++)cells+=`<div class="cal-cell other-month"><div class="cal-date-num">${pd-sd+i+1}</div></div>`;
   for(let d=1;d<=dim;d++){
     const date=new Date(calYear,calMonth,d);
+    const dp=scheduledPosts().filter(p=>p.date&&p.date.getFullYear()===calYear&&p.date.getMonth()===calMonth&&p.date.getDate()===d&&(filters.cc==='all'||p.cat===filters.cc));
     const ist=date.toDateString()===tod.toDateString();
-    const dp=posts.filter(p=>{
-      if(p.is_deleted)return false;
-      if(p.date.getFullYear()!==calYear||p.date.getMonth()!==calMonth||p.date.getDate()!==d)return false;
-      if(filters.cc!=='all'&&p.cat!==filters.cc)return false;
-      if(filters.cs==='done'&&!p.done)return false;
-      if(filters.cs==='todo'&&p.done)return false;
-      return true;
-    });
-    cells+=`<div class="cal-cell${ist?' today':''}">
-      <div class="cal-date-num">${d}</div>
+    cells+=`<div class="cal-cell${ist?' today':''}"><div class="cal-date-num">${d}</div>
       ${dp.map(p=>{
-        const isSel=selectedPost&&selectedPost.id===p.id&&selectedCtx==='cal';
-        return`<div class="cal-post ${CAT_CLS[p.cat]}${p.done?' done':''}${isSel?' selected-post':''}" onclick="selectPost(${p.id},'cal')" title="${p.title}">${p.title}</div>`;
+        const done=['published','reviewed'].includes(p.status);
+        const sel=selectedPost&&selectedPost.id_db===p.id_db&&selectedCtx==='cal';
+        return`<div class="cal-post ${CAT_CLS[p.cat]}${done?' done':''}${sel?' selected-post':''}" onclick="selectPost('${p.id_db}','cal')" title="${p.title}">${p.title}</div>`;
       }).join('')}
     </div>`;
   }
   const rem=(sd+dim)%7===0?0:7-(sd+dim)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cal-cell other-month"><div class="cal-date-num">${i}</div></div>`;
   document.getElementById('cal-grid').innerHTML=cells;
+  renderEditor('cal');
 }
-
 function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else calMonth--;renderCal();}
 function calNext(){if(calMonth===11){calMonth=0;calYear++;}else calMonth++;renderCal();}
 function goToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderCal();setTimeout(()=>{const el=document.querySelector('.cal-cell.today');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},50);}
 
-// ─── EDIT TAB ─────────────────────────────────────────────
+// LAB
+function renderLab(){
+  const pub=posts.filter(p=>!p.is_deleted&&['published','reviewed'].includes(p.status));
+  const im=pub.reduce((s,p)=>s+p.impressions,0);
+  const react=pub.reduce((s,p)=>s+p.reactions,0);
+  const com=pub.reduce((s,p)=>s+p.comments,0);
+  const prof=pub.reduce((s,p)=>s+p.profile_views,0);
+  const dm=pub.reduce((s,p)=>s+p.dm_count,0);
+  const er=im?((react+com)/im*100).toFixed(1):0;
+  document.getElementById('lab-cards').innerHTML=`
+    <div class="lab-card"><strong>${pub.length}</strong><span>опубликовано</span></div>
+    <div class="lab-card"><strong>${im.toLocaleString()}</strong><span>показов</span></div>
+    <div class="lab-card"><strong>${prof}</strong><span>переходов в профиль</span></div>
+    <div class="lab-card"><strong>${dm}</strong><span>диалогов</span></div>
+    <div class="lab-card"><strong>${er}%</strong><span>ER (реакции+комм/показы)</span></div>
+  `;
+  const rows=[...pub].sort((a,b)=>(b.impressions+b.profile_views*20+b.dm_count*50)-(a.impressions+a.profile_views*20+a.dm_count*50)).slice(0,15);
+  document.getElementById('lab-body').innerHTML=rows.length?rows.map((p,i)=>`
+    <tr class="${i<3?'winner':''}">
+      <td>${p.title}</td>
+      <td>${GOALS[p.goal]||'–'}</td>
+      <td>${p.impressions||0}</td>
+      <td>${p.reactions||0}</td>
+      <td>${p.comments||0}</td>
+      <td>${p.profile_views||0}</td>
+      <td>${p.dm_count||0}</td>
+      <td>${p.impressions?((p.reactions+p.comments)/p.impressions*100).toFixed(1):0}%</td>
+    </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;">Пока нет опубликованных постов с метриками</td></tr>';
+}
+
+// EDIT TAB + BULK SELECT
 function renderEdit(){
   const bm={};
-  posts.forEach(p=>{if(!bm[p.m])bm[p.m]=[];bm[p.m].push(p);});
+  const visible=posts.filter(p=>!p.is_deleted);
+  const sched=visible.filter(p=>p.post_date&&p.date);
+  const bank=visible.filter(p=>!p.post_date||!p.date);
+  sched.forEach(p=>{if(!bm[p.m])bm[p.m]=[];bm[p.m].push(p);});
   let h='';
+  // Scheduled posts
   Object.keys(bm).sort((a,b)=>a-b).forEach(m=>{
-    h+=`<div class="edit-section-head">${MN[parseInt(m)]||m}</div>`;
-    h+=`<div class="edit-row" style="background:var(--surface2);font-size:10px;color:var(--text3);letter-spacing:.04em;padding:5px 16px;">
-      <span>День</span><span>Рубрика</span><span>Тема</span><span>Дата</span><span></span>
-    </div>`;
+    h+=`<div class="edit-section-head">${MN[parseInt(m)]}</div>
+      <div class="edit-row" style="background:var(--surface2);font-size:10px;color:var(--text3);padding:5px 16px;">
+        <span></span><span>День</span><span>Рубрика</span><span>Тема</span><span>Дата</span><span></span>
+      </div>`;
     bm[m].forEach(p=>{
-      const ds=p.date.toISOString().split('T')[0];
       h+=`<div class="edit-row">
+        <input type="checkbox" class="sel-cb" ${selectedForEdit.has(p.id_db)?'checked':''} onchange="toggleEditSel('${p.id_db}',this.checked)">
         <span class="edit-date">${DAYS[p.day_index]}</span>
-        <select class="edit-select ${CAT_CLS[p.cat]}" onchange="editCat(${p.id},this.value)">
-          <option value="case"${p.cat==='case'?' selected':''}>Кейс</option>
-          <option value="tip"${p.cat==='tip'?' selected':''}>Совет</option>
-          <option value="truth"${p.cat==='truth'?' selected':''}>Правда</option>
-          <option value="process"${p.cat==='process'?' selected':''}>Процесс</option>
-          <option value="personal"${p.cat==='personal'?' selected':''}>Личное</option>
-        </select>
-        <input class="edit-input" value="${p.title.replace(/"/g,'&quot;')}" onchange="editTitle(${p.id},this.value)" onblur="editTitle(${p.id},this.value)">
-        <input class="edit-input" type="date" value="${ds}" onchange="editDate(${p.id},this.value)">
-        <button class="edit-del" onclick="deletePost(${p.id})" title="Удалить">×</button>
+        <select class="edit-select ${CAT_CLS[p.cat]}" onchange="editField('${p.id_db}','cat',this.value)">${catOpts(p.cat)}</select>
+        <input class="edit-input" value="${(p.title||'').replace(/"/g,'&quot;')}" onchange="editField('${p.id_db}','title',this.value)">
+        <input class="edit-input" type="date" value="${p.post_date||''}" onchange="editDateField('${p.id_db}',this.value)">
+        <button class="edit-del" onclick="deletePost('${p.id_db}')">×</button>
       </div>`;
     });
   });
-  document.getElementById('edit-container').innerHTML=h;
-}
-
-function editTitle(id,val){
-  const p=posts[id];if(!p||p.title===val)return;
-  p.title=val;updatePostField(p,{title:val});
-}
-
-function editCat(id,val){
-  const p=posts[id];if(!p)return;
-  p.cat=val;updatePostField(p,{cat:val});
-  renderList();renderEdit();
-}
-
-function editDate(id,val){
-  const p=posts[id];if(!p||!val)return;
-  p.post_date=val;p.date=new Date(val+'T00:00:00');p.m=p.date.getMonth()+1;
-  updatePostField(p,{post_date:val});
-  renderList();renderEdit();
-}
-
-async function deletePost(id){
-  const p=posts[id];if(!p)return;
-  if(!confirm(`Скрыть «${p.title}»?\n\nЗапись останется в базе, но не будет отображаться.`))return;
-  p.is_deleted=true;
-  if(p.id_db){
-    setSyncStatus('сохранение...','saving');
-    const{error}=await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).eq('id',p.id_db);
-    if(error){setSyncStatus('ошибка','error');console.error(error);p.is_deleted=false;return;}
-    setSyncStatus('сохранено','saved');
+  // Bank in edit tab
+  if(bank.length){
+    h+=`<div class="edit-section-head">Банк идей (без даты)</div>`;
+    bank.forEach(p=>{
+      h+=`<div class="edit-row">
+        <span></span>
+        <span class="edit-date">–</span>
+        <select class="edit-select ${CAT_CLS[p.cat]}" onchange="editField('${p.id_db}','cat',this.value)">${catOpts(p.cat)}</select>
+        <input class="edit-input" value="${(p.title||'').replace(/"/g,'&quot;')}" onchange="editField('${p.id_db}','title',this.value)">
+        <input class="edit-input" type="date" value="" placeholder="назначить дату" onchange="editDateField('${p.id_db}',this.value)">
+        <button class="edit-del" onclick="deletePost('${p.id_db}')">×</button>
+      </div>`;
+    });
   }
-  if(selectedPost&&selectedPost.id===id)selectedPost=null;
-  renderList();renderEdit();renderCal();
+  document.getElementById('edit-container').innerHTML=h;
+  updateEditSelUI();
 }
 
-// ─── MODAL (add new post) ─────────────────────────────────
+function catOpts(cur){return Object.entries(CAT_NAME).map(([k,v])=>`<option value="${k}"${k===cur?' selected':''}>${v}</option>`).join('');}
+
+function toggleEditSel(id_db,checked){
+  if(checked)selectedForEdit.add(id_db);else selectedForEdit.delete(id_db);
+  updateEditSelUI();
+}
+
+function updateEditSelUI(){
+  const n=selectedForEdit.size;
+  const el=document.getElementById('edit-sel-count');
+  const btn=document.getElementById('btn-remove-date');
+  if(el)el.textContent=n?`Выбрано: ${n}`:'Отметь посты чтобы переместить в Банк идей';
+  if(btn)btn.style.display=n?'':'none';
+}
+
+async function removeSelectedDates(){
+  if(!selectedForEdit.size)return;
+  if(!confirm(`Убрать дату у ${selectedForEdit.size} постов? Они перейдут в Банк идей.`))return;
+  setSyncStatus('сохранение...','saving');
+  for(const id_db of selectedForEdit){
+    const p=posts.find(x=>x.id_db===id_db);if(!p)continue;
+    p.post_date=null;p.date=null;p.m=null;
+    await sb.from('posts').update({post_date:null,updated_at:new Date().toISOString()}).eq('id',id_db);
+  }
+  selectedForEdit.clear();
+  setSyncStatus('сохранено','saved');
+  buildMonthPills();renderList();renderBank();renderEdit();renderCal();
+}
+
+function editField(id_db,field,val){
+  const p=posts.find(x=>x.id_db===id_db);if(!p)return;
+  p[field]=val;savePostToDB(p);
+  if(field==='cat')renderEdit();
+  renderList();renderLab();
+}
+
+function editDateField(id_db,val){
+  const p=posts.find(x=>x.id_db===id_db);if(!p)return;
+  if(val){
+    const date=new Date(val+'T00:00:00');
+    p.post_date=val;p.date=date;p.m=date.getMonth()+1;p.day_index=date.getDay()===0?6:date.getDay()-1;
+  }else{p.post_date=null;p.date=null;p.m=null;}
+  savePostToDB(p);buildMonthPills();renderList();renderBank();renderEdit();renderCal();
+}
+
+async function deletePost(id_db){
+  const p=posts.find(x=>x.id_db===id_db);if(!p)return;
+  if(!confirm(`Скрыть «${p.title}»?`))return;
+  p.is_deleted=true;
+  const{error}=await sb.from('posts').update({is_deleted:true,updated_at:new Date().toISOString()}).eq('id',id_db);
+  if(error){setSyncStatus('ошибка','error');p.is_deleted=false;return;}
+  if(selectedPost&&selectedPost.id_db===id_db)selectedPost=null;
+  renderList();renderBank();renderEdit();renderCal();renderLab();
+}
+
+// MODAL
 let modalCtx='list';
 function openModal(ctx){
   modalCtx=ctx;
   const t=new Date();
-  document.getElementById('modal-date').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  document.getElementById('modal-date').value=ctx==='bank'?'':`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
   document.getElementById('modal-title-input').value='';
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(()=>document.getElementById('modal-title-input').focus(),50);
@@ -798,38 +913,30 @@ function closeModal(){document.getElementById('modal-overlay').classList.remove(
 
 async function saveModal(){
   const title=document.getElementById('modal-title-input').value.trim();
+  if(!title){alert('Введи тему');return;}
   const cat=document.getElementById('modal-cat').value;
+  const goal=document.getElementById('modal-goal').value;
   const dateStr=document.getElementById('modal-date').value;
-  if(!title){alert('Введи тему поста');return;}
-  if(!dateStr){alert('Выбери дату');return;}
-  const[y,mo,d]=dateStr.split('-').map(Number);
-  const date=new Date(y,mo-1,d);
-  const dow=date.getDay();const dayIdx=dow===0?6:dow-1;
+  const hasDate=!!dateStr;
+  const date=hasDate?new Date(dateStr+'T00:00:00'):null;
+  const dayIdx=date?(date.getDay()===0?6:date.getDay()-1):0;
   const postData={
-    post_key:`custom_${Date.now()}`,
-    week:999,
-    day_index:dayIdx,
-    cat,title,
-    post_date:dateStr,
-    is_custom:true,
-    sort_order: posts.length + 1000
+    post_key:`custom_${Date.now()}`,week:999,day_index:dayIdx,cat,title,goal,format:'case',
+    status:'idea',post_date:dateStr||null,is_custom:true,sort_order:posts.length+1000,
+    hook_score:0,impressions:0,reactions:0,comments:0,reposts:0,saves:0,
+    profile_views:0,new_followers:0,dm_count:0,notes:'',post_text:'',is_deleted:false
   };
   try{
     setSyncStatus('сохранение...','saving');
-    const row=await insertPostToDB(postData);
-    const newPost={...postData,...row,id:posts.length,id_db:row.id,date,m:mo,done:false,post_text:''};
+    const{data,error}=await sb.from('posts').insert({...postData,user_id:currentUser.id}).select().single();
+    if(error)throw error;
+    const newPost={...postData,...data,id_db:data.id,date,m:date?date.getMonth()+1:null};
     posts.push(newPost);
     setSyncStatus('сохранено','saved');
-    closeModal();
-    buildMonthPills();
-    renderList();renderEdit();
-    if(document.getElementById('tab-calendar').style.display!=='none'){calYear=y;calMonth=mo-1;renderCal();}
-    selectPost(newPost.id,modalCtx);
-  }catch(e){
-    setSyncStatus('ошибка','error');
-    console.error('saveModal error:',e);
-    alert('Ошибка: '+e.message);
-  }
+    closeModal();buildMonthPills();renderList();renderBank();renderEdit();renderCal();
+    selectPost(newPost.id_db,hasDate?modalCtx:'bank');
+    if(!hasDate)switchTab('bank');
+  }catch(e){setSyncStatus('ошибка','error');alert('Ошибка: '+e.message);}
 }
 </script>
 </body>
