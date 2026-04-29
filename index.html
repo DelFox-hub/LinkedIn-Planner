@@ -475,9 +475,11 @@ function genDefaultPosts(){
 
 function hydrate(data){
   return data.map((r,i)=>{
-    const hasDate=r.post_date&&r.post_date!=='';
-    const d=hasDate?new Date(r.post_date+'T00:00:00'):null;
+    const rawDate=r.post_date;
+    const hasDate=rawDate&&rawDate!=='null'&&rawDate!=='';
+    const d=hasDate?new Date(rawDate+'T00:00:00'):null;
     return{...r,_idx:i,id_db:r.id,date:d,m:d?d.getMonth()+1:null,
+      post_date:hasDate?rawDate:null,
       status:r.status||'idea',goal:r.goal||'trust',format:r.format||'case',
       hook_score:+(r.hook_score||0),impressions:+(r.impressions||0),reactions:+(r.reactions||0),
       comments:+(r.comments||0),reposts:+(r.reposts||0),saves:+(r.saves||0),
@@ -575,8 +577,8 @@ function switchTab(t){
 }
 
 // LIST
-function scheduledPosts(){return posts.filter(p=>!p.is_deleted&&p.post_date&&p.date);}
-function bankPosts(){return posts.filter(p=>!p.is_deleted&&(!p.post_date||!p.date));}
+function scheduledPosts(){return posts.filter(p=>!p.is_deleted&&p.post_date&&p.post_date!=='null'&&p.date);}
+function bankPosts(){return posts.filter(p=>!p.is_deleted&&(!p.post_date||p.post_date==='null'||!p.date));}
 function filteredPosts(){
   return scheduledPosts().filter(p=>{
     if(filters.m&&p.m!==filters.m)return false;
@@ -611,17 +613,17 @@ function renderList(){
           const sel=selectedPost&&selectedPost.id_db===p.id_db&&selectedCtx==='list';
           const done=['published','reviewed'].includes(p.status);
           const ist=p.date&&p.date.toDateString()===ts;
+          const isSelForBulk=listSelected.has(p.id_db);
           h+=`<div class="post-row${done?' done':''}${sel?' selected':''}${ist?' today-hl':''}" onclick="selectPost('${p.id_db}','list')">
-            <input type="checkbox" class="sel-cb" ${listSelected.has(p.id_db)?'checked':''} onclick="event.stopPropagation();toggleListSel('${p.id_db}',this.checked)">
-            <div class="cb" onclick="event.stopPropagation();quickStatus('${p.id_db}')">
+            <div class="cb" title="Отметить опубликованным" onclick="event.stopPropagation();quickStatus('${p.id_db}')">
               <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <span class="day-tag">${DAYS[p.day_index]}</span>
             <span class="cat-dot ${DOT_CLS[p.cat]}"></span>
             <span class="post-title">${p.title}${p.is_custom?'<span class="custom-badge">своя</span>':''}</span>
             <span class="cat-badge ${CAT_CLS[p.cat]}">${CAT_NAME[p.cat]}</span>
-            <span class="goal-badge">${GOALS[p.goal]||''}</span>
             <span class="status-badge ${STATUS_CLS[p.status]||''}">${STATUSES[p.status]||'Идея'}</span>
+            <input type="checkbox" class="sel-cb" title="Выделить для массовых действий" ${isSelForBulk?'checked':''} onclick="event.stopPropagation();toggleListSel('${p.id_db}',this.checked)">
             <button class="edit-del" onclick="event.stopPropagation();deletePost('${p.id_db}')" title="Скрыть">×</button>
           </div>`;
         });
