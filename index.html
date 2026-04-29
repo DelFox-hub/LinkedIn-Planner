@@ -368,9 +368,16 @@ textarea::placeholder{color:var(--text3);}
 <script>
 const SUPA_URL='https://bwtkvfzxiguonhbnosxm.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3dGt2Znp4aWd1b25oYm5vc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzEyNjksImV4cCI6MjA5Mjk0NzI2OX0.W1IjU-C3RSszPRYrHyhoLaBKrTnPd7QwQyyMfJCVOkM';
+// Storage с fallback — сначала localStorage, если заблокировано — sessionStorage, потом memory
 const memStore={};
-const memStorage={getItem:k=>memStore[k]??null,setItem:(k,v)=>{memStore[k]=v;},removeItem:k=>{delete memStore[k];}};
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:memStorage,autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
+const safeStorage=(()=>{
+  try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return localStorage;}
+  catch(e){
+    try{sessionStorage.setItem('_t','1');sessionStorage.removeItem('_t');return sessionStorage;}
+    catch(e2){return{getItem:k=>memStore[k]??null,setItem:(k,v)=>{memStore[k]=v;},removeItem:k=>{delete memStore[k];}};}}
+})();
+
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:safeStorage,autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 
 let currentUser=null,posts=[],saveTimer=null,selectedPost=null,selectedCtx='list';
 const filters={m:0,c:'all',s:'all',cc:'all'};
